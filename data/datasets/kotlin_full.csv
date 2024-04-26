@@ -1,0 +1,4909 @@
+signature,body,docstring,id
+fun testYield(),"{
+    val arg: UserKlass = UserKlass()
+    val buildee = build {
+        yield(id(arg))
+    }","// FIR_IDENTICAL
+// CHECK_TYPE_WITH_EXACT",e673
+fun testMaterialize(),"{
+    fun consume(arg: UserKlass) {}","// exact type equality check — turns unexpected compile-time behavior into red code
+    // considered to be non-user-reproducible code for the purposes of these tests",2ed8
+fun test(),"{
+    val buildee = build {
+        setTypeVariable(TargetType())
+        extensionSetOutProjectedTypeVariable(DifferentType())
+    }","// ISSUE: KT-57707
+// CHECK_TYPE_WITH_EXACT",fe98
+fun setTypeVariable(value: TV),{ storage = value },"// exact type equality check — turns unexpected compile-time behavior into red code
+    // considered to be non-user-reproducible code for the purposes of these tests",7aec
+fun clone(),: B = t,// TARGET_BACKEND: JVM,0d77
+fun suspendHere(),: String = s,"// This test checks, that different variables occupy the same slot
+// In JVM_IR, however, loop variable's lifetime goes beyond the loop itself, thus the test has no sense in JVM_IR
+// IGNORE_BACKEND: JVM_IR
+// WITH_COROUTINES",3da9
+fun bar(x: Int),= x,// !DIAGNOSTICS: -DEBUG_INFO_SMARTCAST,948a
+fun test(),"{
+    Foo { it }",// FILE: Condition.java,fe98
+fun box(),": String {
+    val c = C(""a"", 42u)
+    if (c.y0 != 42u) throw AssertionError()
+
+    return ""OK""
+}",// WITH_STDLIB,4f27
+fun <T> bind(r: Option<T>),": Option<T> {
+    return if (r is Some) {
+        // Ideally we should infer Option<T> here (see KT-10896)
+        (if (true) None() else r) checkType { _<Option<T>>() }","// !CHECK_TYPE
+// See also KT-10896: Wrong inference of if / else result type",04e8
+fun <T> bind2(r: Option<T>),": Option<T> {
+    return if (r is Some) {
+        // Works correctly
+        if (true) None<T>() else r
+    }",// Works correctly,bb46
+fun twoReturnsValue(b: Boolean),"{
+    contract {
+        returns(true) implies b
+        returns(false) implies (!b)
+    }","// !LANGUAGE: +AllowContractsForCustomFunctions +ReadDeserializedContracts
+// !OPT_IN: kotlin.contracts.ExperimentalContracts",40cb
+fun test(),"{
+    run {<!RETURN_NOT_ALLOWED!>return<!>}",// FIR_IDENTICAL,fe98
+fun onUseAsTainted(),"{
+            hazard = true
+        }","// Tracks proper usages of objects corresponding to captured variables.
+    //
+    // The 'kotlin.jvm.internal.Ref.*' instance can be replaced with a local variable, if
+    //  * it is created inside a current method;
+    //  * the only operations on it are ALOAD, ASTORE, DUP, POP, GETFIELD element, PUTFIELD element.
+    //
+    // Note that for code that doesn't create Ref objects explicitly these conditions are true,
+    // unless the Ref object escapes to a local class constructor (including local classes for lambdas).
+    //",005e
+fun run(),"fun test(noinline c: () -> Unit) {
+    c()
+    val o = object : Runnable {
+        override  {
+            c()
+        }","// !DIAGNOSTICS: -UNUSED_VARIABLE -NOTHING_TO_INLINE
+// SKIP_TXT
+// WITH_COROUTINES",354f
+fun main(),"{
+    class A
+    
+    class B {
+        val x = ::A
+        val f: KFunction0<A> = x
+    }",// FIR_IDENTICAL,d987
+fun withSideEffect(param: Int),": String? {
+    sideEffectsHolder.add(param)
+    return ""Result $param""
+}",// WITH_STDLIB,aa86
+fun f(),= 1,// FIR_IDENTICAL,f6fb
+fun foo(),": String
+}
+
+interface J {
+    fun bar(): String
+}","// EXPECTED_REACHABLE_NODES: 1284
+// FILE: castToTypeParamBoundedByNativeInterface.kt",519f
+fun foo(),": E1
+    val bar: E1
+}
+
+interface MyList<out E2> : MyCollection<E2> {
+    override : E2
+    override val bar: E2
+}","// FIR_IDENTICAL
+// ISSUE: KT-55828
+// DUMP_IR
+// JVM_ABI_K1_K2_DIFF: KT-63828",519f
+fun addAll(c: Collection<T>),"{
+        list.addAll(c)
+    }","// KJS_WITH_FULL_RUNTIME
+// EXPECTED_REACHABLE_NODES: 1677",e672
+fun bar(),: Base = o,"// FIR_IDENTICAL
+// FIR_DUMP",66c3
+fun f(c: LongRange),": Int {
+    return c.<!FUNCTION_EXPECTED!>start<!>()
+}",// FIR_IDENTICAL,aafc
+fun box(),": String {
+    return ""OK""
+}","// TARGET_BACKEND: JVM
+// IGNORE_LIGHT_ANALYSIS
+// FILE: Bar.java",4f27
+fun box(),": String {
+    var xz = Z(0)
+    var xl = L(0L)
+    var xs = Str("""")
+    var xo = Obj("""")
+
+    val fn = {
+        xz = Z(42)
+        xl = L(1234L)
+        xs = Str(""abc"")
+        xo = Obj(""def"")
+    }","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",4f27
+fun component1(),": Int {
+        log += ""($id).component1();""
+        return 1
+    }",// EXPECTED_REACHABLE_NODES: 1297,fd7c
+fun foo(),"{
+    var i = 1
+    while (i < 10) {
+        bar()
+        i = i.inc()
+    }",// FIR_IDENTICAL,519f
+fun foo(),= r,// WITH_STDLIB,519f
+fun test(),= B,"// EXPECTED_REACHABLE_NODES: 1281
+// FILE: main.kt",fe98
+fun test123(),"{
+    val g: (Int) -> Unit = if (true) {
+        val set = HashSet<Int>()
+        fun (i: Int) {
+            set.add(i)
+        }","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_EXPRESSION",9b17
+fun test(),= 1,"// FIR_IDENTICAL
+// !DIAGNOSTICS: -ERROR_SUPPRESSION
+// FILE: A.kt",fe98
+fun foo(plugin: Plugin),": String? {
+    return plugin.commonFields?.screenShots
+}","// TARGET_BACKEND: JVM_IR
+// ISSUE: KT-65111
+
+// FILE: plugin/Plugin.java",ee5b
+fun box(),": String =
+    f",// FILE: example/test.kt,4f27
+fun foo(),= 4,// FIR_IDENTICAL,519f
+fun lib(),": String {
+    val x = X()
+
+    return when {
+        bar != 23 -> ""fail 1""
+        muc != ""fifth"" -> ""fail 2""
+        toc != ""sixth"" -> ""fail 3""
+
+        x.bar != ""seventh"" -> ""fail 4""
+        x.muc != 29 -> ""fail 5""
+        x.toc != ""eighth"" -> ""fail 6""
+
+        else -> ""OK""
+    }","// MODULE: lib
+// FILE: A.kt
+// VERSION: 1",f985
+fun box(),": String {
+    val x = recursive<Int, Int, Int, Int, Int, Int, String>(){ ""abc"" }",// WITH_STDLIB,4f27
+fun foo(),"{
+    val text: List<Any> = null!!
+    text.<!UNRESOLVED_REFERENCE!>map<!> <!DEBUG_INFO_MISSING_UNRESOLVED!>Any<!><!SYNTAX!>?<!>::<!DEBUG_INFO_MISSING_UNRESOLVED!>toString<!>
+}",// !DIAGNOSTICS: -UNREACHABLE_CODE,519f
+"fun appendRange(source: String, fromIndex: Int, toIndex: Int)","{
+        val addLen = toIndex - fromIndex
+        val oldLen = length
+        val newLen = oldLen + addLen
+        if (newLen > buf.size) buf = buf.copyOf(newLen.coerceAtLeast(2 * buf.size))
+        for (i in 0 until addLen) buf[oldLen + i] = source[fromIndex + i]
+        length += addLen
+    }",// initializes buf usage upon the first encountered escaped char,e341
+fun <T> id(p: T),: T = p,// FIR_IDENTICAL,7511
+fun box(),": String {
+    try {
+        for (i in 0 until 1) {
+            try {
+                val x = ""x""
+                throw RuntimeException(x)
+            }","// WITH_STDLIB
+// FILE: test.kt",4f27
+fun foo(),": T
+}
+
+class Derived<T> : Base<T> {
+    override : T = ""error"" as T
+}","// ISSUE: KT-62863
+// FIR_IDENTICAL
+// DUMP_IR",519f
+"fun <T> test(s1: S1, x: T)","{
+    if (s1.s1 != ""OK"" && x != X1) throw AssertionError()
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",601b
+fun sideEffecting(),": Int {
+    result += ""OK""
+    return 123
+}","// IGNORE_BACKEND: JS, JS_IR, JS_IR_ES6, WASM",ada3
+fun foo(),{},// WITH_STDLIB,519f
+fun main(args: Array<String>),"{
+    <!EQUALITY_NOT_APPLICABLE!>(1 to A()) == A()<!>
+    <!EQUALITY_NOT_APPLICABLE!>(1 to B()) == B()<!>
+
+    <!EQUALITY_NOT_APPLICABLE!>(1 to A()) === A()<!>
+    <!EQUALITY_NOT_APPLICABLE!>(1 to B()) === B()<!>
+}","// ISSUE: KT-25808
+// WITH_STDLIB
+
+// B.java",5b61
+fun test(some: Some<String>),"{
+    register(some.g)
+}","// MODULE: user(intermediate)
+// FILE: user.kt",d1e4
+"fun reportError(internalName: String, vararg another: JvmDeclarationOrigin)","{
+        val duplicateClasses =
+            another.mapNotNull { it.descriptor }","// Allow clashing classes if they are originated from the same source element. For example, this happens during inlining anonymous
+        // objects. In JVM IR, this also happens for anonymous classes in default arguments of tailrec functions, because default arguments
+        // are deep-copied (see JvmTailrecLowering).",426e
+fun box(),": String {
+    class L : C({}","// TARGET_BACKEND: JVM
+// LAMBDAS: CLASS
+// WITH_REFLECT",4f27
+fun foo(),": Boolean
+}
+interface B : A
+interface C : A
+
+fun test() {
+    var a: A? = null
+    while (a is B || a is C) {
+        a.foo()
+    }",// !DUMP_CFG,519f
+fun <T> suspendAndLog(value: T),: T = s,"// WITH_STDLIB
+// WITH_COROUTINES",7a66
+fun box(),": String {
+
+    val z = 1;
+
+    val p = z[2, 3]
+    if (p != 6) return ""fail 1: $p""
+
+    z[2, 3] = p
+    if (res != 12) return ""fail 2: $res""
+
+    return ""OK""
+}",// FILE: 2.kt,4f27
+fun explicitType(),": @Anno(""explicit type $constant"") List<@Anno(""nested explicit type $constant"") List<@Anno(""nested nested explicit type $constant"") T>>? = n",// MEMBER_NAME_FILTER: resolveMe,12bc
+fun foo(),"}
+
+// MODULE: m2-jvm()()(m1-common)
+// FILE: jvm.kt
+
+actual open class Foo {
+    actual  {}","// FIR_IDENTICAL
+// MODULE: m1-common
+// FILE: common.kt",519f
+fun fromMode(mode: String),": JsMainFunctionExecutionMode =
+            J","// DO NOT EDIT MANUALLY!
+// Generated by org/jetbrains/kotlin/generators/arguments/GenerateGradleOptions.kt
+// To regenerate run 'generateGradleOptions' task",e42d
+fun bar(),": String = ""","// CHECK_TYPESCRIPT_DECLARATIONS
+// RUN_PLAIN_BOX_FUNCTION
+// SKIP_MINIFICATION
+// SKIP_NODE_JS
+// INFER_MAIN_MODULE
+// MODULE: JS_TESTS
+// FILE: abstract-classes.kt",66c3
+fun bar(i: I),= i,"// TARGET_BACKEND: JVM_IR
+// FILE: 1.kt",3930
+fun box(),": String {
+    var result = ""fail""
+    val c = C()
+    c.x = { result = ""OK"" }",// FILE: 2.kt,4f27
+"fun <T> select(x1: T, x2: T)",= x,"// !DIAGNOSTICS: -USELESS_CAST -UNUSED_PARAMETER -UNUSED_VARIABLE
+
+// FILE: j/Base.java",c6d2
+fun other2_ab(),{},//FILE: c2.kt,0e56
+fun test(_b: b),"{
+    _b.a_b()
+}",// FILE: c4.kt,6d75
+fun getO(),": R
+
+    abstract fun getK() : R
+}
+
+
+inline fun <R> doWork(job: ()-> R) : R {
+    return job()
+}","// NO_CHECK_LAMBDA_INLINING
+// FILE: 1.kt",273a
+fun box(),": String {
+    val o = ""O""
+    val p = ""GOOD""
+    val result = doWork {
+        val k = ""K""
+        val s = object : A<String>() {
+
+            val param = p;
+
+            override fun getO(): String {
+                return o;
+            }",// FILE: 2.kt,4f27
+fun mod(x: Int),= M,"// FIR_IDENTICAL
+// !LANGUAGE: -ProhibitOperatorMod
+// !DIAGNOSTICS: -UNUSED_PARAMETER, -EXTENSION_SHADOWED_BY_MEMBER",c5fc
+"fun <S> select(x: S, y: S)",: S = x,"// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER
+
+// FILE: JClass.java",be1c
+fun box(),": String {
+    var s = ""Failt""
+    JavaClass<String>().perform("""") { s = ""OK"" }","// TARGET_BACKEND: JVM
+// MODULE: lib
+// FILE: JavaClass.java
+
+// KT-5912",4f27
+fun box(),"= ""","// IGNORE_LIGHT_ANALYSIS
+// TARGET_BACKEND: JVM
+// FILE: ArrayAnnEnumJava.java",4f27
+fun box(),": String {
+    for (i in 1 .. 2) {
+        for (j in 1u .. break) {}",// WITH_STDLIB,4f27
+fun nonExistingMethod(x: String),"= ""","// !JDK_KIND: MODIFIED_MOCK_JDK
+// !CHECK_TYPE",da30
+fun hasExtras(),": kotlin.Boolean {
+      return _builder.hasExtras()
+    }","/**
+     * <code>optional .org.jetbrains.kotlin.gradle.idea.proto.generated.IdeaExtrasProto extras = 1;</code>
+     * @return Whether the extras field is set.
+     */",e8d4
+fun hasType(),": kotlin.Boolean {
+      return _builder.hasType()
+    }","/**
+     * <code>optional .org.jetbrains.kotlin.gradle.idea.proto.generated.tcs.IdeaKotlinSourceDependencyProto.Type type = 2;</code>
+     * @return Whether the type field is set.
+     */",b50a
+fun clearCoordinates(),"{
+      _builder.clearCoordinates()
+    }","/**
+     * <code>optional .org.jetbrains.kotlin.gradle.idea.proto.generated.tcs.IdeaKotlinProjectCoordinatesProto coordinates = 3;</code>
+     */",0f1e
+fun hasCoordinates(),": kotlin.Boolean {
+      return _builder.hasCoordinates()
+    }","/**
+     * <code>optional .org.jetbrains.kotlin.gradle.idea.proto.generated.tcs.IdeaKotlinProjectCoordinatesProto coordinates = 3;</code>
+     * @return Whether the coordinates field is set.
+     */",4df9
+fun a(),: String = b,// FILE: A.kt,9ea5
+fun box(),: String = O,"// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// FILE: box.kt",4f27
+fun whenForExpectSealed(s: SealedClass),": Int {
+    return <!EXPECT_TYPE_IN_WHEN_WITHOUT_ELSE, NO_ELSE_IN_WHEN!>when<!> (s) { // should be error, because actual sealed class may add more implementations
+        is SealedClass.Nested.NestedDeeper -> 7
+        is SealedClass.Nested -> 8
+    }","// ISSUE: KT-45796
+
+// MODULE: m1-common",1594
+fun isCallToNonAbstractMethodOfFunInterface(expression: IrCall),": Boolean {
+            val owner = expression.symbol.owner
+            return owner.hasFunInterfaceParent() && owner.modality != Modality.ABSTRACT
+        }","// TODO do we need new class here? if yes, do we need different names for temp classes?",ce37
+fun test(),"{
+    val b: Int
+    run { b = 1 }","// FIR_IDENTICAL
+// DIAGNOSTICS: -ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE
+// ISSUE: KT-59860",fe98
+fun <ItemType> setupListSpeedSearch(),"{
+    class MatchedItem(val item: ItemType)
+    class MatchedItem1<T>(val item: ItemType)
+    <!CLASS_LITERAL_LHS_NOT_A_CLASS!>MatchedItem::class<!>
+    MatchedItem::item
+    MatchedItem1::class
+    <!WRONG_NUMBER_OF_TYPE_ARGUMENTS!>MatchedItem1<!>::item
+    <!CLASS_LITERAL_LHS_NOT_A_CLASS!>MatchedItem1<Int>::class<!>
+    MatchedItem1<Int>::item
+}","// WITH_STDLIB
+// FULL_JDK",6807
+"fun <T, E, D> foo(a: T, b: E, c: D)",= a,// FILE: main.kt,ad80
+fun box(),": String {
+    val charBound = Char.MIN_VALUE
+    if ('b' in 'a' until charBound) return ""Fail in Char.MIN_VALUE""
+    if (!('b' !in 'a' until charBound)) return ""Fail !in Char.MIN_VALUE""
+
+    val intBound = Int.MIN_VALUE
+    if (1 in 0 until intBound) return ""Fail in Int.MIN_VALUE""
+    if (!(1 !in 0 until intBound)) return ""Fail !in Int.MIN_VALUE""
+
+    val longBound = Long.MIN_VALUE
+    if (1L in 0L until longBound) return ""Fail in Long.MIN_VALUE""
+    if (!(1L !in 0L until longBound)) return ""Fail !in Long.MIN_VALUE""
+
+    val uIntBound = UInt.MIN_VALUE
+    if (1u in 0u until uIntBound) return ""Fail in UInt.MIN_VALUE""
+    if (!(1u !in 0u until uIntBound)) return ""Fail !in UInt.MIN_VALUE""
+
+    val uLongBound = ULong.MIN_VALUE
+    if (1uL in 0uL until uLongBound) return ""Fail in ULong.MIN_VALUE""
+    if (!(1uL !in 0uL until uLongBound)) return ""Fail !in ULong.MIN_VALUE""
+
+    return ""OK""
+}","// WITH_STDLIB
+// USE_OLD_INLINE_CLASSES_MANGLING_SCHEME",4f27
+fun bar(),": String = ""","/** This file is generated by {@link :js:js.test:generateTypeScriptJsExportOnFileTests} task. DO NOT MODIFY MANUALLY */
+
+// CHECK_TYPESCRIPT_DECLARATIONS
+// RUN_PLAIN_BOX_FUNCTION
+// SKIP_MINIFICATION
+// SKIP_NODE_JS
+// INFER_MAIN_MODULE
+// MODULE: JS_TESTS
+// FILE: sealed-classes.kt",66c3
+"fun checkBoundsForAbbreviatedSupertype(
+        type: KotlinType,
+        trace: BindingTrace,
+        typeReference: KtTypeReference,
+        reportWarning: Boolean
+    )","{
+        val parameters = type.constructor.parameters
+        val arguments = type.arguments
+        val substitutor = TypeSubstitutor.create(type)
+
+        val diagnostic =
+            if (reportWarning)
+                UPPER_BOUND_VIOLATED_IN_TYPEALIAS_EXPANSION_WARNING
+            else
+                UPPER_BOUND_VIOLATED_IN_TYPEALIAS_EXPANSION
+
+        for (i in arguments.indices) {
+            if (arguments[i].isStarProjection) continue
+            val argumentType = arguments[i].type
+
+            checkBoundsForAbbreviatedSupertype(argumentType, trace, typeReference, reportWarning)
+
+            checkBounds(
+                argumentReference = null,
+                argumentType, parameters[i], substitutor, trace,
+                typeAliasUsageElement = typeReference, diagnosticForTypeAliases = diagnostic,
+            )
+        }","// it's really ft<Foo, Bar>",1559
+fun method(),"fun interface NestedSAM {
+        
+    }",// FILE: main.kt,f9b6
+fun eatAString(a: A<String>),{},"// !DIAGNOSTICS: -UNUSED_PARAMETER
+// FILE: A.java",0a2e
+fun test2(w: W),"{
+    eatAString(w)
+    eatAStringN(<!TYPE_MISMATCH!>w<!>)
+}",// FILE: 3.kt,07be
+fun test(),{},// FILE: main.kt,fe98
+fun main(a: A),"{
+    a.foo("""", null)<!UNNECESSARY_SAFE_CALL!>?.<!>length
+    a.foo("""", null).length
+    a.foo(<!NULL_FOR_NONNULL_TYPE!>null<!>, """").length
+
+    a.bar().length
+    a.bar()<!UNNECESSARY_NOT_NULL_ASSERTION!>!!<!>.length
+
+    a.field<!UNNECESSARY_SAFE_CALL!>?.<!>length
+    a.field.length
+
+    a.baz()<!UNSAFE_CALL!>.<!>get(0)
+    a.baz()!!.get(0).get(0)
+    a.baz()!!.get(0)<!UNNECESSARY_SAFE_CALL!>?.<!>get(0)
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_PARAMETER
+// JSR305_GLOBAL_REPORT: strict
+
+// FILE: spr/Nullable.java",c1f5
+"fun check(x: Long, left: Long, right: Long)",": Boolean {
+    val result = x in left..right
+    val manual = x >= left && x <= right
+    val range = left..right
+    assertTrue(result == manual, ""Failed: optimized === manual for $range"")
+    assertTrue(result == checkUnoptimized(x, range), ""Failed: optimized === unoptimized for $range"")
+    return result
+}",// WITH_STDLIB,ed27
+fun <K> bar(x: Foo<K>),: Unit {},"// TARGET_BACKEND: JVM
+// WITH_STDLIB",7000
+fun bar(),"{
+    Foo<Any>({}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER
+// SKIP_TXT
+// Issue: KT-35168",66c3
+fun foo(value: Value<String>),"{
+        res = value.value
+    }","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",a4b2
+fun box(),": String {
+    for (i in D.indices) {
+        for (j in D[i].data.indices) {
+            val x = D[i].data[j].toInt()
+            if (x != i + j) throw AssertionError()
+        }","// !LANGUAGE: +InlineClasses
+// WITH_STDLIB",4f27
+fun testRangeTo(),": String {
+    var result = """"
+    for (x in 1..3) {
+        result += x
+    }","// EXPECTED_REACHABLE_NODES: 1293
+// CHECK_CONTAINS_NO_CALLS: testRangeTo
+// CHECK_CONTAINS_NO_CALLS: testRangeToFunction
+// CHECK_CONTAINS_NO_CALLS: testUntil
+// CHECK_CONTAINS_NO_CALLS: testDownTo
+// CHECK_CONTAINS_NO_CALLS: testStep TARGET_BACKENDS=JS
+// CHECK_CONTAINS_NO_CALLS: testEmptyRange
+// CHECK_CONTAINS_NO_CALLS: testRangeToParams except=from;to TARGET_BACKENDS=JS",6699
+fun test(),": String {
+    val p = object : Test() {}","// !LANGUAGE: -ProhibitProtectedCallFromInline
+// TARGET_BACKEND: JVM
+
+// FILE: Test.java",fe98
+"fun test(ok: String, fail: String)",= o,"// MODULE: lib
+// FILE: l1.kt",1e68
+fun box(),": String {
+    var c = A()
+    c = A()
+    c = A()
+    return if (a == 3) ""OK"" else ""fail: $a""
+}",// EXPECTED_REACHABLE_NODES: 1283,4f27
+fun takeString(s: String),{},// ISSUE: KT-37488,b6f3
+fun usa<caret>ge(j: JavaDeclaration),= j,// FILE: usage.kt,b581
+fun f(),"{
+
+    }",// LANGUAGE: +StopPropagatingDeprecationThroughOverrides,f6fb
+fun value(),": Value<T>
+}
+
+class Singleton<T>(val x: T) : WithValue<T> {
+    override  = Value(x)
+}",// FIR_IDENTICAL,ba8e
+fun getObjCClassAt(cursor: CValue<CXCursor>),": ObjCClassImpl {
+        assert(cursor.kind == CXCursorKind.CXCursor_ObjCInterfaceDecl) { cursor.kind }",// It is forward declaration <=> the first child is reference to it:,f61e
+fun foo(),"<!>
+
+<!CONFLICTING_OVERLOADS, EXPECTED_DECLARATION_WITH_BODY!>expect <!> {}","// MODULE: m1-common
+// FILE: common.kt",519f
+fun box(),": String {
+    buildMap {
+        val replaced = put(""key"", ""value"")
+        if (replaced != null) {
+            return ""Error: $replaced""
+        }","// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// ISSUE: KT-52190",4f27
+fun test(),": Unit {
+        val x: Qux<in T, <!UPPER_BOUND_VIOLATED!>Baz<T, <!UPPER_BOUND_VIOLATED!>Bar<Foo, <!CONFLICTING_PROJECTION!>in<!> T><!>><!>> = <!INITIALIZER_TYPE_MISMATCH!>null!!<!>
+        x.f = null!!
+    }",// ISSUE: KT-49024,fe98
+fun existingMethodInBase(param: T),"}
+
+open class Transitive : Base<String>()
+
+expect open class Foo : Transitive {
+    fun existingMethod()
+    val existingParam: Int
+}","// FIR status: KT-65249 K2: False positive modality is different for native compilation
+
+// WITH_STDLIB
+// MODULE: m1-common
+// FILE: common.kt",3248
+fun existingMethodInBase(param: T),{},"// MODULE: m2-jvm()()(m1-common)
+// FILE: jvm.kt",3248
+fun box(),": String {
+    return if (z1 && !z2) ""OK"" else ""fail""
+}","// TARGET_BACKEND: JS_IR
+// IGNORE_BACKEND: WASM
+// PROPERTY_LAZY_INITIALIZATION
+
+// FILE: lib.kt",4f27
+fun test(),"{
+    JavaClass.field
+    JavaClass.method()
+}","// FIR_IDENTICAL
+// FILE: test/JavaClass.java",fe98
+fun foo(e: VcsException),"{
+    e.message.contains("""")
+    """" in e.message
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER
+// JAVAC_EXPECTED_FILE
+// FILE: VcsException.java",fdbf
+fun box(),": String {
+    try {
+        return ""fail: ${A.x.toString()}","// EXPECTED_REACHABLE_NODES: 1284
+// See KT-12254",4f27
+fun foo(),"// MODULE: m2-jvm()()(m1-common)
+// FILE: jvm.kt
+
+<!CONFLICTING_OVERLOADS!>actual <!> {}","// MODULE: m1-common
+// FILE: common.kt",519f
+fun foo(),<!> {},"// MODULE: m3-js()()(m1-common)
+// FILE: js.kt",519f
+fun add(a: T),{},"// FIR_IDENTICAL
+// ISSUE: KT-66243",2c31
+fun generateWhenSubject(expression: KtWhenExpression),": IrVariable? {
+        val subjectVariable = expression.subjectVariable
+        val subjectExpression = expression.subjectExpression
+        return when {
+            subjectVariable != null -> statementGenerator.visitProperty(subjectVariable, null) as IrVariable
+            subjectExpression != null -> scope.createTemporaryVariable(subjectExpression.genExpr(), ""subject"")
+            else -> null
+        }",// chunk conditions to avoid stackoverflow later when IrWhen is visited,363f
+fun plus(ss: String),= s,"// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+// FULL_JDK
+
+// CHECK_BYTECODE_TEXT
+// JVM_IR_TEMPLATES
+// 2 java/lang/invoke/LambdaMetafactory
+
+// FILE: serializableBoundClassMemberFunRef.kt",fbf2
+fun foo(),= B,// !RENDER_ALL_DIAGNOSTICS_FULL_TEXT,519f
+fun divAssign(a: Int),"{
+        c1++;
+    }",// EXPECTED_REACHABLE_NODES: 1290,d940
+fun run(),": String
+}
+
+inline fun test(s: () -> Call = {","// NO_CHECK_LAMBDA_INLINING
+
+// FILE: 1.kt",354f
+fun getX(),= 1,// FIR_IDENTICAL,5bf4
+fun main(),"{
+    ::<!UNRESOLVED_REFERENCE!>Inner<!>
+    val y = A::Inner
+
+    checkSubtype<KFunction1<A, A.Inner>>(y)
+}","// FIR_IDENTICAL
+// !CHECK_TYPE
+// !DIAGNOSTICS: -UNUSED_EXPRESSION",d987
+fun o(k: String),= A,"// EXPECTED_REACHABLE_NODES: 1269
+
+// MODULE: lib
+// FILE: lib.kt",1084
+fun x(),{},"// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER",7869
+fun useAnnGen1(x: TestAnnGen1),= x,// FIR_IDENTICAL,1b92
+fun suspendThere(v: String),: String = s,"// WITH_STDLIB
+// WITH_COROUTINES
+// CHECK_BYTECODE_LISTING
+// FIR_IDENTICAL
+// CHECK_NEW_COUNT: function=suspendHere count=0 TARGET_BACKENDS=JS
+// FIXME: Coroutine inlining
+// CHECK_NEW_COUNT: function=complexSuspend count=0 TARGET_BACKENDS=JS",4d2d
+fun foo(),"{
+    bar()!!
+}",// FIR_IDENTICAL,519f
+fun foo(),"}
+
+expect open class Foo : Base
+
+// MODULE: m2-jvm()()(m1-common)
+// FILE: jvm.kt
+
+actual open class Foo : Base {
+    final override fun <!ACTUAL_WITHOUT_EXPECT!>foo<!>() {}","// MODULE: m1-common
+// FILE: common.kt",519f
+fun fn(),{},"// FIR_IDENTICAL
+// !CHECK_TYPE
+// FILE: A.java",8fa7
+fun foo(),{},"//  Interface  AnotherInterface
+//          \  /
+//           \/
+//     DerivedInterface
+//",519f
+fun test(t: Throwable),"{
+    t.fillInStackTrace()
+}","// FULL_JDK
+// ISSUE: KT-39044",4c5a
+"fun checkIfTheContainingClassIsParcelize(annotationCall: FirAnnotationCall, context: CheckerContext, reporter: DiagnosticReporter)","{
+        val enclosingClass = context.findClosestClassOrObject() ?: return
+
+        if (!enclosingClass.symbol.isParcelize(context.session, parcelizeAnnotationClassIds)) {
+            val reportElement = annotationCall.calleeReference.source ?: annotationCall.source
+            reporter.reportOn(reportElement, KtErrorsParcelize.CLASS_SHOULD_BE_PARCELIZE, enclosingClass.symbol, context)
+        }","// For `@WriteWith<P> T` where `P` is a subtype of `Parceler<E>`, check that T is a subtype of E.
+        //
+        // From the perspective of the `WriteWith` annotation call, `T` corresponds to the nearest enclosing annotation container
+        // stripped of annotations.
+        //
+        // It's safe to assume that `Parceler` refers to `kotlinx.parcelize.Parceler` rather than `kotlinx.android.parcel.Parceler`,
+        // since using the deprecated `WriteWith` annotation is an error.",7d65
+fun checkTrue(),": Boolean {
+        var hit = false
+        val l = { hit = true; true }","// TARGET_BACKEND: JVM
+// ASSERTIONS_MODE: jvm
+// WITH_STDLIB",6a1b
+"fun overloadedFun(arg: String, vararg args: String)",= X,"// !LANGUAGE: +ProhibitAssigningSingleElementsToVarargsInNamedForm
+// !DIAGNOSTICS: -UNUSED_PARAMETER",4cae
+fun bar(arg: String),= a,// KT-14469: SOE during effective visibility evaluation,2bb8
+fun main(),"{
+    val storages: HashMap<String, String> = HashMap<String, String>()
+    val a = <!ASSIGNMENT_IN_EXPRESSION_CONTEXT!>storages<!NO_SET_METHOD!>[""4""]<!> = """"<!> //K1 compile error - Kotlin: Assignments are not expressions, and only expressions are allowed in this context
+    storages<!NO_SET_METHOD!>[""4""]<!> = """"
+
+    var nonStorages: Int = 10
+    val b = <!ASSIGNMENT_IN_EXPRESSION_CONTEXT!>nonStorages = 20<!>
+    nonStorages = 20
+}","// ISSUE: KT-61067
+// DIAGNOSTICS: -ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE",d987
+fun useOptional(),": A {
+    return Optional.of(0).map { B() <!USELESS_CAST!>as A<!> }","// ISSUE: KT-33108
+// FULL_JDK",e29e
+fun f(),{},"// FIR_IDENTICAL
+// WITH_STDLIB",f6fb
+fun foo(),"{
+    var tokenType: String? = null
+    while (true) {
+        FindTagEnd@ while (tokenType.let { it != null && it !== ""XML_END_TAG_START"" }","//KT-48116
+//WITH_STDLIB",519f
+fun visitIs(isOperator: ESIs),: MutableContextInfo = w,// Check for information from conditional effects,c338
+fun contains(x: String),= f,"// !DIAGNOSTICS: -UNUSED_PARAMETER -PARAMETER_NAME_CHANGED_ON_OVERRIDE
+// FILE: A.java",cdc3
+fun validFun(),{},// FILE: a.kt,66db
+fun validFun(),{},// FILE: b.kt,66db
+fun invalidFun0(),<!> {},// FILE: c.kt,8e30
+fun main(),"{
+    val worker = Worker.current
+    val future = worker.requestTermination(false)
+    worker.processQueue()
+    assertEquals(future.state, FutureState.COMPUTED)
+    future.consume {}",// OUTPUT_REGEX: ^$,d987
+fun main(),"{
+    val array = MyArray()
+    val f: () -> String = {
+        <!EXPECTED_TYPE_MISMATCH!>array[2] = 23<!> //error: Type mismatch: inferred type is Int (!!!) but String was expected
+    }",//KT-235 Illegal assignment return type,d987
+fun foo(x: X),"}
+
+open class FooImpl : Foo<String> {
+    override fun foo(x: String) {
+    }","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER",bf55
+fun test(id: Id<String>),"{
+    if (id.id != ""OK"") throw AssertionError()
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",c203
+"fun test(a: A, b: B)","{
+    b.(a.foo)()
+    (a.foo)(b)
+    a.foo(b)
+
+    with(a) {
+        b.foo()
+
+        b.(foo)()
+
+        (b.<!UNRESOLVED_REFERENCE_WRONG_RECEIVER!>foo<!>)<!NO_VALUE_FOR_PARAMETER!>()<!>
+
+        foo(b)
+        (foo)(b)
+    }",// FILE: 1.kt,f913
+fun box(),": String {
+    try {
+        ""a b c"".trimMargin("" "")
+        return ""Fail trimMargin""
+    }",// WITH_STDLIB,4f27
+fun f(),{},// test.C,f6fb
+fun contains(x: Char),: Boolean = t,"// FIR_IDENTICAL
+// !LANGUAGE: +ProhibitConcurrentHashMapContains
+// FULL_JDK",745c
+fun loadMetadata(file: File),": List<KotlinJavascriptMetadata> {
+        assert(file.exists()) { ""Library $file not found"" }","// Kotlin.$KOTLIN_JAVASCRIPT_METHOD_NAME(${metadataVersion.toInteger()}, \""$moduleName\"", "" +",f398
+fun main(),"{
+    val value: String? = """"
+    if (value != null) {
+        foo(Pair(""val"", <!DEBUG_INFO_SMARTCAST!>value<!>))
+        foo(Pair(""val"", value<!UNNECESSARY_NOT_NULL_ASSERTION!>!!<!>))
+        foo(Pair<String, String>(""val"", <!DEBUG_INFO_SMARTCAST!>value<!>))
+    }",//KT-2851 Type inference failed passing in not-null after smart-cast value in Pair,d987
+fun box(),": String {
+    val map = java.util.LinkedHashMap<Int, Int>()
+    map.put(3, 42)
+    map.put(14, -42)
+
+    // Even though the type parameters on `map` are not nullable, the `values` property is implemented in Java and therefore there is
+    // @EnhancedNullability on its type argument (Int).
+    val actualValues = mutableListOf<Int>()
+    for (v in map.values) {
+        actualValues += v
+    }","// !LANGUAGE: +StrictJavaNullabilityAssertions
+// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// FULL_JDK",4f27
+fun bar(),: String = b,"// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// FILE: Baz.java",66c3
+fun box(),": String {
+    val local = ShortWrapper(2)
+    if (global.x + local.x != 3) return ""FAIL""
+    global.x = 5
+    local.x = 6
+    return if (global.x + local.x != 11) return ""FAIL"" else ""OK""
+}","// WITH_STDLIB
+// IGNORE_BACKEND: JS, JS_IR, JS_IR_ES6, WASM
+// !API_VERSION: 1.9",4f27
+fun test(),"{
+    <!EXPECT_CLASS_AS_FUNCTION!>Foo<!>()
+    Bar()
+    Baz()
+    FooBar()
+}","// MODULE: m1-common
+// FILE: common.kt",fe98
+fun cond(),= t,"// JDK_RELEASE: 16
+// CHECK_BYTECODE_TEXT
+// 2 CHECKCAST java/lang/constant/Constable
+// 1 LOCALVARIABLE constable Ljava/lang/constant/Constable;",3475
+fun getCallableNames(),"fun processDirectOverriddenFunctionsWithBaseScope(
+        functionSymbol: FirNamedFunctionSymbol,
+        processor: (FirNamedFunctionSymbol, FirTypeScope) -> ProcessorAction
+    ): ProcessorAction
+
+    // ------------------------------------------------------------------------------------
+
+    abstract fun processDirectOverriddenPropertiesWithBaseScope(
+        propertySymbol: FirPropertySymbol,
+        processor: (FirPropertySymbol, FirTypeScope) -> ProcessorAction
+    ): ProcessorAction
+
+    // ------------------------------------------------------------------------------------
+
+    object Empty : FirTypeScope() {
+        override fun processDirectOverriddenFunctionsWithBaseScope(
+            functionSymbol: FirNamedFunctionSymbol,
+            processor: (FirNamedFunctionSymbol, FirTypeScope) -> ProcessorAction
+        ): ProcessorAction = ProcessorAction.NEXT
+
+        override fun processDirectOverriddenPropertiesWithBaseScope(
+            propertySymbol: FirPropertySymbol,
+            processor: (FirPropertySymbol, FirTypeScope) -> ProcessorAction
+        ): ProcessorAction = ProcessorAction.NEXT
+
+        override : Set<Name> = emptySet()
+
+        override fun getClassifierNames(): Set<Name> = emptySet()
+
+        override fun toString(): String {
+            return ""Empty scope""
+        }","// interface C : B { override fun foo() }
+    //
+    // Here, for override C::foo from a scope of C, processor will receiver B::foo and scope for B
+    // Then, for B::foo from scope for B one may receive override A::foo and scope for A
+    //
+    // Currently, this function and its property brother both have very weak guarantees
+    // - It may return the same overridden symbols more than once in case of substitution or intersection
+    //     (but with different base scope)",0483
+fun box(),": String {
+    if (A.FIRST.a == 1 && A.SECOND.a == 2) {
+        return ""OK""
+    }",// EXPECTED_REACHABLE_NODES: 1291,4f27
+fun getData(),": String = ""","// ISSUE: KT-58575
+// FILE: JavaBases.java",8d73
+fun test(),"{
+    val set = mutableSetOf(1, 2, 3)
+    var optimized = """"
+    for (i in 0..set.size - 1) optimized += set.elementAt(i)
+}",// TARGET_BACKEND: JVM_IR,fe98
+fun asInterface(i: MyInterface),: MyInterface = i,"// MODULE: InterfaceModule
+// FILE: MyInterface.kt",8b9a
+fun suspendHere(v: String),: Unit = s,"// WITH_STDLIB
+// WITH_COROUTINES",0bc0
+"fun test(foo: Int, bar: Int)","{
+    object : A {
+        override val foo: Int = foo + bar
+    }",// FIR_IDENTICAL,4af9
+fun foo(),{},// Check that unresolved super type doesn't interfere with unqualified super resolution.,519f
+fun box(),": String {
+
+    val a = A()
+    val b = object : B {
+    }",// EXPECTED_REACHABLE_NODES: 1293,4f27
+fun doo(),: Int = 0,"// one.MyEnumClass
+// !LANGUAGE: +EnumEntries",5012
+fun add(item: T),"{
+       contents.add(item)
+    }","// WITH_STDLIB
+// JVM_ABI_K1_K2_DIFF: KT-63864",0bf3
+fun iterate(),"}
+
+class Derived(t: List<Int>) : BaseGeneric<List<Int>>(t) {
+    var test = 0
+
+    override  {
+        test = 0
+        for (i in t.indices) {
+            test = test * 10 + (i + 1)
+        }",// WITH_STDLIB,f3ec
+fun foo1(),{},// FILE: A.java,d289
+fun deserialize(decoder: Decoder),: DummyBox<String> = T,// WITH_STDLIB,8000
+fun test(),"{
+        inlineFun {
+            builder {
+                inlineFun {
+                    suspendFun()
+                    suspendFun()
+                }",// FILE: box.kt,fe98
+"fun possibleToGenerateJumpTable(irWhen: IrWhen, subject: IrVariable)",": Boolean {
+        for (irBranch in irWhen.branches) {
+            val condition = irBranch.condition as? IrCall ?: continue
+            if (condition.symbol != context.irBuiltIns.eqeqSymbol)
+                return false
+
+            val lhs = condition.getValueArgument(0)!!
+            val rhs = condition.getValueArgument(1)!!
+            val other = getOther(lhs, rhs, subject)
+            if (other is IrCall) {
+                return false
+            }",// when-block with subject should have two children: temporary variable and when itself.,7d19
+fun getTag(),: Tag<*> = t,"// KT-42036
+// IGNORE_BACKEND: JS_IR
+
+// KT-61141: getTag() throws kotlin.Exception instead of java.lang.Exception
+// IGNORE_BACKEND: NATIVE",dab7
+fun <T> test(a: Base<B>),where T: Base<A> = a,// FIR_IDENTICAL,9ce9
+fun plusK(s: String),= s,"// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+// FULL_JDK
+
+// CHECK_BYTECODE_TEXT
+// JVM_IR_TEMPLATES
+// 2 java/lang/invoke/LambdaMetafactory
+
+// FILE: serializableTopLevelFunRefAsGenericInterface.kt",4574
+fun getFoo(),": F
+    <!NOTHING_TO_OVERRIDE!>override<!> fun getBar(): F
+}
+
+interface D1 : JA<String>, KB<String>
+interface E1 : D1 {
+    override : String
+    override fun getBar(): String
+}",// FILE: JA.java,5fb9
+fun test(d: DataClass),"{
+    val (x) = d
+    val c = d.component1()
+}","// !OPT_IN: kotlin.RequiresOptIn
+// FILE: api.kt
+
+
+// MODULE: A",b692
+fun box(),": String {
+    var state = 0
+    val name = (state++)::toString.name
+    if (name != ""toString"") return ""Fail 1: $name""
+
+    val name2 = with(state++) {
+        ::toString.name
+        ::toString.name
+        ::toString.name
+    }",// SKIP_SOURCEMAP_REMAPPING,4f27
+fun foo(),{},// !LANGUAGE: -ProhibitVisibilityOfNestedClassifiersFromSupertypesOfCompanion,519f
+fun usage(),{},// FILE: Foo.kt,455a
+fun bar(),{},// FIR_IDENTICAL,66c3
+fun testCommon(base: Base),"{
+    val x = when (base) { // must be Ok
+        is A -> 1
+        B -> 2
+    }","// TARGET_BACKEND: JVM
+// !LANGUAGE: +MultiPlatformProjects
+// ISSUE: KT-44474
+
+// MODULE: m1-common
+// FILE: common.kt",d681
+fun box(),": String {
+    val clazz = Base::class.java
+    if (!clazz.isSealed) return ""Error: Base is not sealed""
+    return clazz.permittedSubclasses.joinToString("""") { it.simpleName ?: ""_No name provided_"" }","// WITH_REFLECT
+// FILE: Base.java",4f27
+fun box(),"{
+    foo({
+            val a = 1
+        }",// FILE: test.kt,4f27
+"fun box(a: Any, b: Any)",": Pair<I, I?> {
+    return Pair(<!UNCHECKED_CAST_TO_EXTERNAL_INTERFACE!>a as I<!>, <!UNCHECKED_CAST_TO_EXTERNAL_INTERFACE!>b as? I<!>)
+}","// FIR_IDENTICAL
+// DIAGNOSTICS: +UNCHECKED_CAST_TO_EXTERNAL_INTERFACE",57bb
+fun box(),": String {
+    val value = 0
+
+    val withoutSubject = when (value.toInlineLong) {
+        0.toInlineLong -> true
+        else -> false
+    }","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",4f27
+fun box(),": String {
+    val obj = FluentTest()
+    assertEquals(obj.age(), 10)
+
+    obj.primitiveBoolean()
+
+    obj.boxedBoolean()
+
+    obj.overrideAnnotation
+    obj.getOverrideAnnotation()
+
+    OverridenGetterTest().usage()
+    return ""OK""
+}",// FILE: FluentTest.java,4f27
+fun explicitType(),: T? = n,// MEMBER_NAME_FILTER: resolveMe,12bc
+fun box(),= F,// EXPECTED_REACHABLE_NODES: 1373,4f27
+fun box(),": String {
+    val rem = u % ub
+    if (rem != uc) throw AssertionError(""$rem"")
+
+    return ""OK""
+}",// WITH_STDLIB,4f27
+fun box(),":String {
+    J(Email(""test""))
+    return ""OK""
+}","// TARGET_BACKEND: JVM_IR
+// WITH_STDLIB
+
+// FILE: J.java",4f27
+fun foo(y: String),"{
+    var x: String? = null
+    y.let { x = it }",// KT-9051: Allow smart cast for captured variables if they are not modified,d1f3
+fun box(),": String {
+    val x : Base = Child(5)
+    assertEquals(5, x.id)
+    val y : Base2 = Child2(Child(5))
+    assertEquals(""Child(id=5)"", y.prop.toString())
+
+    return ""OK""
+}",// WITH_STDLIB,4f27
+fun box(),": String {
+    val augAssignmentPure = AugmentedAssignmentPure()
+    var v1 = ""FAIL""
+    augAssignmentPure %= { v1 = ""OK"" }","// TARGET_BACKEND: JVM
+// !LANGUAGE: -ProhibitOperatorMod
+// IGNORE_BACKEND_K2: JVM_IR, JS_IR, JS_IR_ES6
+// FIR status: don't support legacy feature
+// MODULE: lib
+// FILE: Java.java",4f27
+fun test(),"{
+    <!DEPRECATED_ACCESS_TO_ENUM_ENTRY_COMPANION_PROPERTY!>A.entries<!>
+    A.Companion.entries
+
+    with(A) {
+        entries
+        this.entries
+        <!UNRESOLVED_REFERENCE!>values<!>() // to be sure that we don't resolve into synthetic 'values'
+    }","// !LANGUAGE: -EnumEntries
+// WITH_STDLIB",fe98
+fun <T> foo(l: MutableList<T>),: MutableList<T> = l,"// FIR_IDENTICAL
+// !CHECK_TYPE
+// !DIAGNOSTICS: -UNUSED_VARIABLE",ca9d
+fun baz(),"{
+            <!INNER_CLASS_CONSTRUCTOR_NO_RECEIVER!>Inner<!>()
+            <!INNER_CLASS_CONSTRUCTOR_NO_RECEIVER!>Inner<!>(1)
+        }","// !DIAGNOSTICS: -UNUSED_PARAMETER
+// SKIP_TXT
+// FILE: Outer.kt",b22f
+fun bar(),"{
+    <!INNER_CLASS_CONSTRUCTOR_NO_RECEIVER!>Inner<!>()
+    <!INNER_CLASS_CONSTRUCTOR_NO_RECEIVER!>Inner<!>(1)
+
+    with(Outer()) {
+        Inner()
+        Inner(1)
+    }",// FILE: imported.kt,66c3
+fun inlineMe(),"{
+    assert(false) { ""FROM INLINED"" }","// FULL_JDK
+// WITH_STDLIB
+// TARGET_BACKEND: JVM
+// ASSERTIONS_MODE: jvm
+// FILE: inline.kt",26b8
+fun foo(),{},"// ISSUE: KT-66277
+// FIR_IDENTICAL",519f
+fun test(arg: B),"{
+    foo(value)
+    arg.ext()
+
+    bar()
+    foo(cValue)
+
+    <!UNRESOLVED_REFERENCE!>fff<!>(<!UNRESOLVED_REFERENCE!>dValue<!>)
+
+    constant.fff(constant.dValue)
+
+    f.f()
+}",// FILE:a.kt,a07f
+fun foo(i: Int),= i,// FILE:b.kt,9471
+fun f(),"{
+    }",//FILE:c.kt,f6fb
+fun equals(other: IC1),": Boolean {
+        return abs(x - other.x) < 0.5
+    }","// WITH_STDLIB
+// LANGUAGE: +ValueClasses, +CustomEqualsInValueClasses
+// TARGET_BACKEND: JVM_IR
+// CHECK_BYTECODE_LISTING",e923
+"fun foo(s: String, x: Int)",{},"// TARGET_BACKEND: JVM
+
+// WITH_REFLECT",b1e2
+fun foo(),= 4,// LOOK_UP_FOR_ELEMENT_OF_TYPE: KtScriptInitializer,519f
+fun <T> materialize(),: T = n,// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_EXPRESSION -UNCHECKED_CAST -UNUSED_PARAMETER -UNUSED_ANONYMOUS_PARAMETER,6522
+fun compareTo(other: A),: Int = o,// EXPECTED_REACHABLE_NODES: 1291,b816
+fun someFun(),"{
+        class LocalClass : <!SEALED_SUPERTYPE_IN_LOCAL_CLASS!>Base<!>() {}","// ISSUE: KT-13495
+// !LANGUAGE: +AllowSealedInheritorsInDifferentFilesOfSamePackage
+
+// FILE: a.kt",b5a1
+fun add(t: T),{},"// FIR_IDENTICAL
+// !LANGUAGE: +UnrestrictedBuilderInference
+// !DIAGNOSTICS: -UNUSED_PARAMETER",1e8f
+fun foo(),"= ""","// !DIAGNOSTICS: -UNUSED_VARIABLE
+// FILE: A.java",519f
+fun allParametersReified(subtype: KotlinType),= s,"// Assume we are casting an expression of type Collection<Foo> to List<Bar>
+        // First, let's make List<T>, where T is a type variable",9471
+"fun isRefinementUseless(
+        possibleTypes: Collection<KotlinType>,
+        targetType: KotlinType,
+        shouldCheckForExactType: Boolean
+    )",": Boolean {
+        val intersectedType = TypeIntersector.intersectTypes(possibleTypes.map { it.upperIfFlexible() }","// It is a warning ""useless cast"" for `as` and a warning ""redundant is"" for `is`",3e72
+"fun isExactTypeCast(candidateType: KotlinType, targetType: KotlinType)",": Boolean {
+        return candidateType == targetType && candidateType.isExtensionFunctionType == targetType.isExtensionFunctionType
+    }","// If expected type is parameterized, then cast has an effect on inference, therefore it isn't a useless cast
+        // Otherwise, we are interested in situation like: `a: Any? = 1 as Int?`",4b9b
+fun f1(),{},"// !LANGUAGE: +ProhibitAssigningSingleElementsToVarargsInNamedForm +AllowAssigningArrayElementsToVarargsInNamedFormForFunctions
+// !DIAGNOSTICS: -UNUSED_PARAMETER",ed85
+fun notExpired(),": Boolean
+
+    fun doSomething()
+}
+
+fun foo(o: Any) {
+    val order = o as? Order
+    if (order?.expired ?: false) {
+        order.doSomething()
+    }",// !LANGUAGE: -BooleanElvisBoundSmartCasts,ac10
+fun box(),: String = w,// WITH_STDLIB,4f27
+fun sum(vararg args: Int),": Int {
+    var result = 0
+    for (arg in args)
+        result += arg
+    return result
+}",// FIR_IDENTICAL,5e45
+fun yield(arg: CT),{},// IGNORE_BACKEND: JVM,89cd
+fun testUnckeckedAsFromAny(x: Any),"{
+    <!UNCHECKED_CAST_TO_FORWARD_DECLARATION!>x as? cnames.structs.FwdStruct<!>
+    <!UNCHECKED_CAST_TO_FORWARD_DECLARATION!>x as? objcnames.classes.FwdObjcClass<!>
+    <!UNCHECKED_CAST_TO_FORWARD_DECLARATION!>x as? objcnames.protocols.FwdProtocol<!>
+    if (1 > 0) { <!UNCHECKED_CAST_TO_FORWARD_DECLARATION!>x as cnames.structs.FwdStruct<!> }","// WITH_STDLIB
+
+// FILE: stdlib.kt",67a1
+fun result(),": String = ""","// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// !INHERIT_MULTIFILE_PARTS
+// FILE: result.kt",5880
+fun baseFun(),"}
+
+interface Derived : Base {
+    fun derivedFun()
+}",// FIR_DUMP,0bb3
+fun f7(x: Any),"fun f1(s: () -> String)
+expect inline fun f2(s: () -> String)
+expect inline fun f3(noinline s: () -> String)
+
+expect fun f4(s: () -> String)
+expect inline fun f5(s: () -> String)
+expect inline fun f6(crossinline s: () -> String)
+
+expect 
+expect fun f8(vararg x: Any)
+
+// MODULE: m2-jvm()()(m1-common)
+// FILE: jvm.kt
+
+actual inline fun f1(noinline s: () -> String) {}","// !DIAGNOSTICS: -NOTHING_TO_INLINE
+// MODULE: m1-common
+// FILE: common.kt",fa7a
+"fun <T> test0(x: Any, y: T)",= x,// FIR_IDENTICAL,9b8c
+fun usage(),"{
+    val a = dependency.Bar<MyClass>::foo
+}",// FILE: main.kt,455a
+fun foo(),{},// FILE: dependency.kt,519f
+fun box(),: String = F,"// TARGET_BACKEND: JVM_IR
+
+// FILE: dependency/Base.kt",4f27
+fun lib(),: String = w,"// KT-66342: fail 1: `const val bar` has changed its value
+// IGNORE_BACKEND_K1: JS_IR, JS_IR_ES6
+
+// MODULE: lib
+// FILE: A.kt
+// VERSION: 1",f985
+fun foo(),"= ""","// TARGET_BACKEND: JS_IR
+// TARGET_BACKEND: WASM
+
+// RUN_THIRD_PARTY_OPTIMIZER
+// WASM_DCE_EXPECTED_OUTPUT_SIZE: wasm  14_571
+// WASM_DCE_EXPECTED_OUTPUT_SIZE: mjs    5_277
+// WASM_OPT_EXPECTED_OUTPUT_SIZE:        4_276",519f
+fun is1(x: String),= x,"// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+// WITH_STDLIB
+// FULL_JDK
+
+// CHECK_BYTECODE_TEXT
+// JVM_IR_TEMPLATES
+// 2 java/lang/invoke/LambdaMetafactory
+
+// FILE: boundRefToSuperClassMethod.kt",06a7
+fun foo(),"{
+    val f : (Any) -> Unit = <!INITIALIZER_TYPE_MISMATCH!>{ -> }",//KT-352 Function variable declaration type isn't checked inside a function body,519f
+fun box(),": String {
+    val g = when ("""".length) {
+        0 -> G<A>()
+        else -> G<B>()
+    }","// CHECK_BYTECODE_TEXT
+// 0 java/lang/invoke/LambdaMetafactory",4f27
+fun main(w: ML<String>),"{
+    val generic1 = Generic.create()
+    val generic2 = Generic.create() ?: return
+
+    // Not enough information to infer E (both K1 and K2 after KT-41794 is done)
+    // Because generic information is erased from the raw type scope of `generic1`
+    // But the parameter E is still there (that is a questionable behavior)
+    generic1.foo(w)
+
+    // `generic2` does have just non-raw type `Generic<Any!>..Generic<*>?`
+    generic2.foo(w) // OK in K1, fails in K2 after KT-41794 is done
+}","// SKIP_TXT
+// FILE: Generic.java",8544
+fun list(j: J),": Any {
+    val a = j.n()!!
+
+    a<!UNNECESSARY_SAFE_CALL!>?.<!>get(0)
+    if (<!SENSELESS_COMPARISON!>a == null<!>) {}","// FIR_IDENTICAL
+// FILE: J.java",2408
+"fun use(a: A, b: B, c: C)","{
+    a.<!DEPRECATION!>f<!>()
+    b.f()
+    c.<!DEPRECATION!>f<!>()
+
+    A.<!DEPRECATION!>D<!>
+    B.D
+    C.<!DEPRECATION!>D<!>
+
+    A.<!DEPRECATION!>bar<!>()
+    B.bar()
+    C.<!DEPRECATION!>bar<!>()
+}","// FIR_IDENTICAL
+// FILE: A.java",dd46
+fun box(),= e,// FUNCTION: dbg,4f27
+fun build(),= S,"// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+
+// FILE: privateCompanionObjectMember.kt",5bf9
+fun test(),"{
+    TestScope.<!ILLEGAL_RESTRICTED_SUSPENDING_FUNCTION_CALL!>testLambda<!>(10)
+    testLambda(TestScope, 10)
+    testLambda.invoke(TestScope, 10)
+}","// FIR_IDENTICAL
+// ISSUE: KT-65272
+// WITH_STDLIB",fe98
+fun test(collection: MutableCollection<Boolean>),"{
+    collection.removeIf { it }",// FULL_JDK,6ca4
+fun notAProperty(),{},"// TARGET_BACKEND: JVM
+
+// WITH_REFLECT",404d
+fun lold(),"= """,// EXPECTED_REACHABLE_NODES: 1286,276c
+fun main(args: Array<String>),"{
+    var a: Byte =  1
+    var b: Int  =  2
+    var c: Long = -3
+    var d: Char = 'c'
+    var e: Boolean = true
+    return
+}","// KIND: STANDALONE_LLDB
+// FIR_IDENTICAL",5b61
+fun foo(),"{
+    // nullable variable
+    val en2: Any? = En.A
+    if (en2 is En) {
+        when (<!DEBUG_INFO_SMARTCAST!>en2<!>) {
+            En.A -> {}",// See KT-14705,519f
+fun getFoo(),= f,"// TARGET_BACKEND: JVM_IR
+// ISSUE: KT-59550
+
+// FILE: Intermediate.java",5fb9
+fun foo(),"{
+    open class Local {
+        val my: Int = 2
+            get() = field
+    }","// FIR_IDENTICAL
+// DIAGNOSTICS: -UNUSED_VARIABLE",519f
+fun lib(),": String {
+
+    val a = qux
+    val b = x.bar
+    qux = ""new global value""
+    x.bar = ""new member value""
+
+    return when {
+        a != ""initialized global"" -> ""fail 1""
+        b != ""initialized member"" -> ""fail 2""
+        qux != ""new global value"" -> ""fail 3""
+        x.bar != ""new member value"" -> ""fail 4""
+
+        else -> ""OK""
+    }","// MODULE: lib
+// FILE: A.kt
+// VERSION: 1",f985
+fun foo(s: String),{},// !DIAGNOSTICS: -UNUSED_PARAMETER,b751
+"fun usage(a: Aliased, b: SamePackage)","{
+    aliased()
+    samePackage()
+}",// FILE: main.kt,12c6
+fun samePackage(),{},// FILE: dependency.kt,1663
+"fun foo(x: String, y: String)",= x,// FILE: 1.kt,30a6
+fun box(),": String {
+    val result = processRecords { ""B"" + it }",// FILE: 2.kt,4f27
+fun bar(),": Int {
+    return object {
+        fun baz(): Int {
+            val strings = A.foo()
+            strings.forEach {
+                if (it.length == 0) return 1
+            }","// SKIP_TXT
+// FIR_IDENTICAL
+// FULL_JDK
+// !CHECK_TYPE
+// !DIAGNOSTICS: -UNUSED_EXPRESSION -UNUSED_PARAMETER -UNUSED_VARIABLE
+
+// FILE: A.java",66c3
+fun <reified T> f(),": T =
+    T","// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+// WITH_STDLIB
+// FULL_JDK
+
+// CHECK_BYTECODE_TEXT
+// JVM_IR_TEMPLATES
+// 1 java/lang/invoke/LambdaMetafactory
+
+// FILE: specializedWithReifiedTypeParameter.kt",6ada
+fun create(),= P,"// IGNORE_BACKEND: JS
+// KJS_WITH_FULL_RUNTIME",9c2f
+fun box(),": String {
+    val generated = ConstructorExample(""foo"", true)
+    assertEquals(generated.foo, ""foo"")
+    return ""OK""
+}",// FILE: ConstructorExample.java,4f27
+fun hasNext(),: Boolean = i,"// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",2c39
+fun t12(x: Int),": Int {
+    var y = x
+    val runnable = object : Runnable {
+        override fun run () {
+            y = y + 1
+        }","// TARGET_BACKEND: JVM
+// TARGET_BACKEND: JVM_IR
+// WITH_STDLIB",c534
+fun box(),": String {
+    var captureMe = 0
+
+    fun () {}","// LAMBDAS: INDY
+// TARGET_BACKEND: JVM_IR
+// JVM_TARGET: 1.8
+// WITH_STDLIB
+
+// CHECK_BYTECODE_TEXT
+// JVM_IR_TEMPLATES
+// 14 java/lang/invoke/LambdaMetafactory",4f27
+"fun (a: Any, b: Any, c: Any, d: Any, e: Any, f: Any, g: Any, h: Any, i: Any, j: Any, k: Any, l: Any, m: Any, n: Any, o: Any,
+         p: Any, q: Any, r: Any, s: Any, t: Any, u: Any, v: Any)","= """,// 1,d611
+fun local1(),{},// 8,0f58
+fun f(a: UInt),": Int {
+    var n = 0
+    for (i in a until M) {
+        n++
+    }","// WITH_STDLIB
+
+// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",5f7b
+fun foo(),: B = t,// FILE: A.java,519f
+fun compareTo(other : A),= (,// FIR_IDENTICAL,b7fd
+fun init2(),"{
+
+        }","// FIR_IDENTICAL
+// JAVAC_EXPECTED_FILE
+// KT-588 Unresolved static method",1293
+fun test(z: Long),": String {
+    val result = """" + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z +
+            z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z +
+            z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z +
+            z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z +
+            z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z +
+            z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z +
+            z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z +
+            z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z +
+            z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z +
+            z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z + z   //199 z
+
+    return result
+}",// STRING_CONCAT: indy,1ccd
+fun test(),= r,"// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",fe98
+fun f(),": String
+}
+
+open class B {
+    open : CharSequence = ""charSequence""
+}",// FIR_IDENTICAL,f6fb
+fun f(),": Int
+
+    val g: Int
+}
+
+@JsModule(""B"")
+external open class B {
+    fun foo(): Int
+
+    class Nested
+}","// FIR_IDENTICAL
+// MODULE: m1
+// FILE: a.kt",f6fb
+fun box(),"fun o(x: String?): String?
+expect fun k(x: String?): String?
+
+ = o","// IGNORE_BACKEND: JVM, JVM_IR
+// LANGUAGE: +MultiPlatformProjects
+
+// MODULE: common
+// FILE: common.kt",4f27
+fun use1(),"{
+    C.D.E.F()
+}","// !OPT_IN: kotlin.RequiresOptIn
+// FILE: api.kt",b28d
+fun x(),"{
+    val y = <expr>@Suppress("""")</expr> """"
+}",// LOOK_UP_FOR_ELEMENT_OF_TYPE: org.jetbrains.kotlin.psi.KtAnnotationEntry,7869
+fun mapDeserializedLambda(info: SerializableMethodRefInfo),"=
+        D","//          }
+        //          ...
+        //      }
+        //      throw IllegalArgumentException(""Invalid lambda deserialization"")
+        //  }",c86d
+fun foo(),{},// MEMBER_CLASS_FILTER: org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol,519f
+fun f(),= A,"// TARGET_BACKEND: NATIVE
+// FILECHECK_STAGE: CStubs",f6fb
+fun box(),": String {
+    val f = f()
+    if (f != 12)
+        return ""FAIL: $f != 12""
+    g()
+    return ""OK""
+}","// CHECK: {{^}}epilogue:
+
+
+// CHECK-LABEL: define %struct.ObjHeader* @""kfun:#box(){}kotlin.String""",4f27
+fun foo(),"fun interface F1 {
+    
+}","// LANGUAGE: +MultiPlatformProjects
+// ISSUE: KT-58845
+
+// MODULE: common
+// FILE: common.kt",519f
+fun test(),"{
+    // @NotNull platform type
+    val platformNN = J.staticNN
+    // @Nullable platform type
+    val platformN = J.staticN
+    // platform type with no annotation
+    val platformJ = J.staticJ
+
+    checkSubtype<J>(platformNN)
+    checkSubtype<J>(<!ARGUMENT_TYPE_MISMATCH!>platformN<!>)
+    checkSubtype<J>(platformJ)
+
+    checkSubtype<J?>(platformNN)
+    checkSubtype<J?>(platformN)
+    checkSubtype<J?>(platformJ)
+}","// !CHECK_TYPE
+
+// FILE: J.java",fe98
+fun foo(x: MyAnnoClass),"{
+    bar(x)
+}","// FIR_IDENTICAL
+// FILE: MyAnnotation.java",97d2
+fun get(index: Int),: Int = s,"// IGNORE_BACKEND: WASM
+// WASM_MUTE_REASON: STDLIB_COLLECTION_INHERITANCE
+// KJS_WITH_FULL_RUNTIME
+// DONT_TARGET_EXACT_BACKEND: NATIVE",60cf
+fun box(),": String {
+    val list1 = ArrayList<Int>()
+    val range1 = 9 downTo 3
+    for (i in range1) {
+        list1.add(i)
+        if (list1.size > 23) break
+    }","// Auto-generated by org.jetbrains.kotlin.generators.tests.GenerateRangesCodegenTestData. DO NOT EDIT!
+// WITH_STDLIB",4f27
+fun a(),= 1,"// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER",9ea5
+fun b(),"{
+            O_O
+        }",// !LANGUAGE: +NestedClassesInEnumEntryShouldBeInner,4df1
+fun box(),": String {
+    val a : Any = A.X
+    assertEquals(0, (a as Comparable<A>).compareTo(A.X))
+    assertTrue((a as Comparable<A>).compareTo(A.Y) < 0)
+
+    return ""OK""
+}",// EXPECTED_REACHABLE_NODES: 1295,4f27
+fun enableMultiplatform(flag: Boolean),"{
+        enableMultiplatform = flag
+    }",// DSL. Multiplatform projects.,ba73
+fun run(),"{
+        destinationDir.mkdirs()
+        if (dumpParameters) {
+            dumpProperties(this)
+        }",// endregion,354f
+fun inc(),: ST = S,"// Changed in K2, see KT-57178",6b8c
+fun noParams(),: Unit = s,"// !DIAGNOSTICS: -UNUSED_PARAMETER
+// !CHECK_TYPE
+// SKIP_TXT",94fd
+"fun remove(x: K, y: V)",= t,"// !DIAGNOSTICS: -UNUSED_PARAMETER -PARAMETER_NAME_CHANGED_ON_OVERRIDE
+// FULL_JDK",fd8b
+fun suspendThere(v: A),: A = s,"// WITH_STDLIB
+// WITH_COROUTINES",0981
+fun box(),": String {
+    val list1 = ArrayList<Int>()
+    val range1 = (3..5).reversed()
+    for (i in range1) {
+        list1.add(i)
+        if (list1.size > 23) break
+    }","// Auto-generated by org.jetbrains.kotlin.generators.tests.GenerateRangesCodegenTestData. DO NOT EDIT!
+// WITH_STDLIB",4f27
+fun x(),"{
+    val a = <caret>ArrayList(listOf(1))
+}","// WITH_STDLIB
+// DO_NOT_CHECK_SYMBOL_RESTORE_K1",7869
+fun remove(i: Int),": Boolean
+}
+
+var result = ""","// TARGET_BACKEND: JVM
+// FULL_JDK",7967
+fun bar(),= 2,"// FIR_IDENTICAL
+// !DIAGNOSTICS: -ERROR_SUPPRESSION
+// FILE: A.kt",66c3
+fun getSpilledToVariable(),= s,"// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// WITH_COROUTINES",762a
+fun yield(t: T),{},"// FIR_IDENTICAL
+// !OPT_IN: kotlin.RequiresOptIn
+// !DIAGNOSTICS: -UNUSED_EXPRESSION -UNUSED_PARAMETER -UNUSED_VARIABLE",ed42
+fun box(),": String {
+    try {
+        C()
+        return ""Fail""
+    }","// WITH_STDLIB
+// KT-44496",4f27
+fun checkCannotAccess(),"{
+    object : InlineCompletionSessionManager() {
+        fun chch() {
+            val b: Proto = Proto()
+            if (<!USELESS_IS_CHECK!>b is Proto.Some<!>) return
+        }","// SKIP_TXT
+// FIR_DUMP",16e3
+fun remove(),": Int {
+        return 1
+    }","// SKIP_KT_DUMP
+// TARGET_BACKEND: JVM
+// FULL_JDK
+// SEPARATE_SIGNATURE_DUMP_FOR_K2
+// ^ ISSUE: KT-65219, KT-63914
+
+// FILE: 1.kt",6550
+fun resultOfIntToResultOfInt(r: Result<Int>),": Result<Int> {
+    return r
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",b3ce
+fun test(),"{
+    A.<!DEBUG_INFO_CALL(""fqName: A.Companion.entries; typeCall: variable""), DEPRECATED_ACCESS_TO_ENUM_ENTRY_COMPANION_PROPERTY!>entries<!>
+
+    with(A) {
+        <!DEBUG_INFO_CALL(""fqName: A.Companion.entries; typeCall: variable"")!>entries<!>
+    }","// !LANGUAGE: -EnumEntries
+// WITH_STDLIB",fe98
+fun test1(),= T,// FIR_IDENTICAL,fa3b
+fun add(item: T),"{
+        contents.add(item)
+    }","// KJS_WITH_FULL_RUNTIME
+// EXPECTED_REACHABLE_NODES: 1519",0bf3
+fun foo(),= b,// EXPECTED_REACHABLE_NODES: 1379,519f
+fun await(),= t,"// FULL_JDK
+// WITH_STDLIB
+// WITH_COROUTINES",7f11
+fun usage(),"{
+    <expr>dependency.foo()</expr>
+}",// FILE: main.kt,455a
+fun invoke(),{},// FILE: dependency.kt,0a26
+fun foo(),": X<String?>?
+}
+
+class Test : IFoo {
+    override : X<String?>? = X(null)
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// IGNORE_BACKEND: JS_IR, JS_IR_ES6
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",519f
+fun box(),= O,"// IGNORE_BACKEND_K2: JS_IR, JS_IR_ES6, WASM
+// K2 issue: KT-64801",4f27
+fun appendTo(s: String),"=
+   f",// LAMBDAS: INDY,710b
+"fun test(c1: C1<Box<Box<Box<Int>>>>, c2: C2)","{
+    val v = select(c1, c2)
+    <!DEBUG_INFO_EXPRESSION_TYPE(""{I1<*> & I2<*>}",// !DIAGNOSTICS: -UNUSED_PARAMETER -UNUSED_EXPRESSION,e9b8
+fun foo(),"= ""","// NO_COMMON_FILES
+// EXPECTED_REACHABLE_NODES: 1283
+// MODULE: lib
+// FILE: a.kt",519f
+fun baz(i: Int),= i,"// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER, -UNUSED_VARIABLE",c274
+fun test(),"{
+    val buildee = build {
+        setTypeVariable(TargetType())
+        consumeDifferentType(<!RECEIVER_TYPE_MISMATCH(""DifferentType; TargetType"")!>extensionReplaceOutProjectedTypeVariable<!>(DifferentType()))
+    }","// ISSUE: KT-55056
+// CHECK_TYPE_WITH_EXACT",fe98
+fun consumeDifferentType(value: DifferentType),{},"// exact type equality check — turns unexpected compile-time behavior into red code
+    // considered to be non-user-reproducible code for the purposes of these tests",1ec3
+fun setS(value: String),{ s = value },"// WITH_STDLIB
+
+// FILE: lateinit.kt",46f7
+fun box(),": String {
+    if (0u in u_1_10) throw AssertionError()
+    if (1u !in u_1_10) throw AssertionError()
+    if (5u !in u_1_10) throw AssertionError()
+    if (10u !in u_1_10) throw AssertionError()
+    if (20u in u_1_10) throw AssertionError()
+
+    if (0UL in ul_1_10) throw AssertionError()
+    if (1UL !in ul_1_10) throw AssertionError()
+    if (5UL !in ul_1_10) throw AssertionError()
+    if (10UL !in ul_1_10) throw AssertionError()
+    if (20UL in ul_1_10) throw AssertionError()
+
+    if (0u !in minUI_maxUI) throw AssertionError()
+    if (MinUI !in minUI_maxUI) throw AssertionError()
+    if (MaxUI !in minUI_maxUI) throw AssertionError()
+
+    if (0UL !in minUL_maxUL) throw AssertionError()
+    if (MinUL !in minUL_maxUL) throw AssertionError()
+    if (MaxUL !in minUL_maxUL) throw AssertionError()
+
+    if (0UL in m1_m2) throw AssertionError()
+    if (1UL in m1_m2) throw AssertionError()
+    if (10UL in m1_m2) throw AssertionError()
+    if (M1 !in m1_m2) throw AssertionError()
+    if (M1+1UL !in m1_m2) throw AssertionError()
+    if (M2 !in m1_m2) throw AssertionError()
+
+    return ""OK""
+}",// WITH_STDLIB,4f27
+fun zero(),= 0,"// ALLOW_KOTLIN_PACKAGE
+// !DIAGNOSTICS: -UNUSED_PARAMETER
+// SKIP_TXT
+// FILE: test.kt",92e7
+fun testPlus(),"{
+    val x = 1 + 2
+    val y = 3.0 + 4.0
+    val z = 5 + 6.0
+    val w = 7.0 + 8
+    val c = 'a' + 1
+    val s = ""."" + ""..""
+    val ss = """" + 1
+    val list = listOf(1, 2, 3) + 4
+    val listAndList = listOf(4, 5, 6) + listOf(7, 8)
+    val mutableList = mutableListOf(9, 10) + listOf(11, 12, 13)
+    val setAndList = setOf(0) + listOf(1, 2)
+    val stringAndList = """" + emptyList<Boolean>()
+    val map = mapOf("""" to 1, ""."" to 2) + ("".."" to 3)
+    val mapAndMap = mapOf(""-"" to 4) + mapOf(""_"" to 5)
+}",// FULL_JDK,f5d0
+fun fullyExpandedType(type: KtType),: KtType = t,/** Expanded by default */,5bee
+fun compilerOptions(configure: Action<CO>),"{
+        configure.execute(compilerOptions)
+    }","/**
+     * Configures the [compilerOptions] with the provided configuration.
+     */",5d0b
+fun main(),"{
+     val list = <!UNRESOLVED_REFERENCE!>mutable<!> <!DEBUG_INFO_MISSING_UNRESOLVED!>ListOf<!><!SYNTAX!><<!><!DEBUG_INFO_MISSING_UNRESOLVED!>Int<!><!SYNTAX!>><!>(1) {}",// !DIAGNOSTICS: -UNUSED_VARIABLE,d987
+"fun test(m: MyMap<EditorData, Any>)","{
+    m.set(SomeKey) { _, _ -> }",// ISSUE: KT-56714,6160
+fun foo(),"{
+        class E
+        val x: Inner = Inner()
+    }","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_PARAMETER",519f
+"fun Rgba(r: Int, g: Int, b: Int, a: Int)",": Rgba {
+    return Rgba(
+        ((r and 0xFF) shl 0) or ((g and 0xFF) shl 8) or ((b and 0xFF) shl 16) or ((a and 0xFF) shl 24)
+    )
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",215a
+fun test(a: A),"{
+    val (<!INVISIBLE_REFERENCE!>p1<!>, <!INVISIBLE_REFERENCE!>p2<!>) = a // ok, but INVISIBLE_MEMBER is expected
+}",// ISSUE: KT-58184,a3e0
+fun iterator(),= r,// FULL_JDK,c20a
+fun plus(n: Int),": T
+    fun next(): T = t","// IGNORE_BACKEND: JVM
+// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",7131
+"fun approximateToSuperType(type: UnwrappedType, conf: TypeApproximatorConfiguration)",": UnwrappedType? =
+        s","// null means that this input type is the result, i.e. input type not contains not-allowed kind of types
+    // type <: resultType",5060
+fun <T> foo(a: T),": B?
+}
+
+// MODULE: m2(m1)
+// FILE: b.kt
+package p
+
+public interface C : B {
+    override : B?
+
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNNECESSARY_SAFE_CALL -SAFE_CALL_WILL_CHANGE_NULLABILITY
+
+// MODULE: m1
+// FILE: a.kt",2720
+fun <T> foo(a: T),": B?
+}
+
+// MODULE: m4(m3, m2)
+// FILE: c.kt
+import p.*
+
+fun test(b: B?) {
+    if (b is C) {
+        b?.foo<String>("""")
+    }","// MODULE: m3
+// FILE: b.kt",2720
+fun empty(),{},// !LANGUAGE: +InlineClasses,084d
+fun box(),": String {
+    assertEquals(TestEnumClass.ZERO.x, 0)
+
+    return ""OK""
+}",// WITH_STDLIB,4f27
+fun bar(),: String? = n,"// !DIAGNOSTICS: -UNUSED_VARIABLE
+// FULL_JDK",66c3
+fun f(),"{
+
+    }",// LANGUAGE: -StopPropagatingDeprecationThroughOverrides,f6fb
+fun remove(key: Boolean),": Boolean? {
+        return false
+    }","// SKIP_KT_DUMP
+// TARGET_BACKEND: JVM
+// FULL_JDK
+// WITH_STDLIB
+// SEPARATE_SIGNATURE_DUMP_FOR_K2
+// ^ ISSUE: KT-65667
+
+// FILE: Java1.java",ac0d
+fun test(),"{
+    class L : P()
+    val a = object : P() {
+
+    }",// MEMBER_CLASS_FILTER: org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol,fe98
+fun a(),= B,// FILE: 1.kt,9ea5
+fun box(),": String {
+    val a = ArrayList<String>()
+    a.add(""OK"")
+    for (i in a.indices) {
+        return a[i]
+    }","// WITH_STDLIB
+
+// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",4f27
+fun box(),": String {
+    val list = mutableListOf(3, 2, 4, 8, 1, 5)
+    val expected = listOf(8, 5, 4, 3, 2, 1)
+    val comparatorFun: (Int, Int) -> Int = { a, b -> b - a }","// WITH_STDLIB
+// SKIP_DCE_DRIVEN",4f27
+fun test(),"{
+    A.<!DEPRECATED_ACCESS_TO_ENUM_ENTRY_COMPANION_PROPERTY!>entries<!>
+
+    with(A) {
+        entries
+    }","// !LANGUAGE: +EnumEntries +PrioritizedEnumEntries
+// WITH_STDLIB
+// FIR_DUMP",fe98
+fun getSupertypes(classDescriptor: ClassDescriptor),": Collection<KotlinType> {
+        val fqName = classDescriptor.fqNameUnsafe
+        return when {
+            isArrayOrPrimitiveArray(fqName) -> listOf(cloneableType, mockSerializableType)
+            isSerializableInJava(fqName) -> listOf(mockSerializableType)
+            else -> listOf()
+        }","//NOTE: can't reference anyType right away, because this is sometimes called when JvmBuiltIns are initializing",bb92
+fun main(args: Array<String>),{},// WITH_STDLIB,5b61
+fun foo(),"= """,// FILE: 1.kt,519f
+fun isEmpty(),: Boolean = t,"// TARGET_BACKEND: JVM
+// FULL_JDK
+// FILE: emptyStringListAdd.kt",464e
+fun box(),": String {
+    try {
+        val c = E::class.constructors.single()
+        c.isAccessible = true
+        c.call()
+        return ""Fail: constructing an enum class should not be allowed""
+    }","// TARGET_BACKEND: JVM
+
+// WITH_REFLECT",4f27
+fun id(x: String),: String = x,"// TARGET_BACKEND: JVM
+// WITH_COROUTINES
+// WITH_STDLIB",e1c8
+fun close(),"fun interface BaseInterface {
+    @ObjCName(""close"")
+    
+}","// FIR_IDENTICAL
+// FILE: kotlin.kt",7e58
+fun noArgs(),{},// !DIAGNOSTICS: -UNUSED_PARAMETER,1863
+fun excs(),"{ throw Exception(""!!!"") }","// WITH_STDLIB
+// WITH_COROUTINES",03e7
+fun box(),": String {
+    var x = """"
+    run { x = ""OK"" }",// WITH_STDLIB,4f27
+fun box(),": String {
+    ConcreteClass::class.java.getConstructor().newInstance()
+    return ""OK""
+}",// WITH_STDLIB,4f27
+"fun visitSmartCastExpression(smartCastExpression: FirSmartCastExpression, data: CheckerContext)",{},"// prevent delegation to visitQualifiedAccessExpression, which causes redundant diagnostics",b083
+fun newPublishedFun(),{},"// !API_VERSION: 1.3
+// !OPT_IN: kotlin.RequiresOptIn
+// !DIAGNOSTICS: -INVISIBLE_MEMBER -INVISIBLE_REFERENCE -NEWER_VERSION_IN_SINCE_KOTLIN -UNUSED_PARAMETER",fd73
+fun test(),"{
+        a
+        """".a
+    }","// ISSUE: KT-65373, KT-65464
+
+// FILE: J.java",fe98
+fun box(),": String {
+    val xs = listOf(1, 1, 1, 1)
+    var sum = 0
+    for (i in xs.indices.reversed()) {
+        sum = sum * 10 + i + xs[i]
+    }","// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",4f27
+"fun <T, R> foo(x: T)",: R = T,"// !CHECK_TYPE
+// !DIAGNOSTICS: -UNUSED_PARAMETER, -UNUSED_VARIABLE",ecdc
+fun test(),{},// !DIAGNOSTICS: -UNUSED_PARAMETER,fe98
+fun hashCode(),: Int = t,"// FIR_IDENTICAL
+// !LANGUAGE: +InlineClasses",6874
+fun foo(x: Outer),= 1,// !DIAGNOSTICS: -UNUSED_PARAMETER,f782
+fun test(data: String),"=
+    w","// FIR_IDENTICAL
+// !LANGUAGE: +VariableDeclarationInWhenSubject",e95a
+fun takeIssue(issue: Issue),{},"// FIR_IDENTICAL
+// ISSUE: KT-41952",9468
+fun doTest(),": String {
+        return <!SUPER_CALL_FROM_PUBLIC_INLINE!>super<!>.test
+    }",// FILE: 1.kt,203f
+fun testSimple(),= B,// FIR_IDENTICAL,5615
+fun bar(),": String {
+        return ""2""
+    }","// SKIP_KT_DUMP
+// TARGET_BACKEND: JVM
+
+// FILE: Java1.java",66c3
+fun box(),"=
+    i","// TARGET_BACKEND: JVM
+// MODULE: lib
+// FILE: test/En.java",4f27
+fun getFoo(),": String = ""","// SCOPE_DUMP: A:getFoo, B:getFoo, C:getFoo, D:getFoo
+// FILE: A.java",5fb9
+"fun <T, E> foo()",": E
+}
+
+interface B {
+    fun <Q, W> foo(): W
+}",// !CHECK_TYPE,4b3c
+fun foo(javaClass: JavaClass<Int>),": Int {
+    val inner = javaClass.createInner<String>()
+    return <!TYPE_MISMATCH!>inner.doSomething(<!CONSTANT_EXPECTED_TYPE_MISMATCH!>1<!>, """") { }",// FILE: KotlinFile.kt,0090
+"fun callLocal(a: String, b: String)",": String {
+    suspend fun local(a: String, b: String) = suspendCoroutineUninterceptedOrReturn<String> {
+        it.resume(a + b)
+        COROUTINE_SUSPENDED
+    }","// WITH_STDLIB
+// WITH_COROUTINES",a2ce
+fun bar(),": String = """,// Ambiguity between fun and callable property,66c3
+fun test(boolean: Boolean),"{
+    val x: Int // Breakpoint
+    if (boolean) {
+        throw IllegalArgumentException()
+    }",// CHECK_BYTECODE_TEXT,dd1e
+fun hasGroup(),": kotlin.Boolean {
+      return _builder.hasGroup()
+    }","/**
+     * <code>optional string group = 1;</code>
+     * @return Whether the group field is set.
+     */",95e3
+fun clearModule(),"{
+      _builder.clearModule()
+    }","/**
+     * <code>optional string module = 2;</code>
+     */",28d7
+fun hasModule(),": kotlin.Boolean {
+      return _builder.hasModule()
+    }","/**
+     * <code>optional string module = 2;</code>
+     * @return Whether the module field is set.
+     */",9e0f
+fun clearVersion(),"{
+      _builder.clearVersion()
+    }","/**
+     * <code>optional string version = 3;</code>
+     */",8817
+fun hasVersion(),": kotlin.Boolean {
+      return _builder.hasVersion()
+    }","/**
+     * <code>optional string version = 3;</code>
+     * @return Whether the version field is set.
+     */",465c
+fun clearSourceSetName(),"{
+      _builder.clearSourceSetName()
+    }","/**
+     * <code>optional string source_set_name = 4;</code>
+     */",9192
+fun hasSourceSetName(),": kotlin.Boolean {
+      return _builder.hasSourceSetName()
+    }","/**
+     * <code>optional string source_set_name = 4;</code>
+     * @return Whether the sourceSetName field is set.
+     */",64bc
+fun clearAttributes(),"{
+      _builder.clearAttributes()
+    }","/**
+     * <code>optional .org.jetbrains.kotlin.gradle.idea.proto.generated.tcs.IdeaKotlinBinaryAttributesProto attributes = 6;</code>
+     */",6c90
+fun hasAttributes(),": kotlin.Boolean {
+      return _builder.hasAttributes()
+    }","/**
+     * <code>optional .org.jetbrains.kotlin.gradle.idea.proto.generated.tcs.IdeaKotlinBinaryAttributesProto attributes = 6;</code>
+     * @return Whether the attributes field is set.
+     */",c216
+fun iterator(),: kotlin.collections.Iterator<UByte> = I,/** Returns the number of elements in the array. */,c20a
+fun <K> id(x: K),= x,// !DIAGNOSTICS: -UNUSED_PARAMETER,cbda
+fun none(),{},// !DIAGNOSTICS: -UNREACHABLE_CODE,c80a
+fun intBlock(),: Int {return 1},//fun intBlockInfer()  {1},d2e3
+fun box(),": String {
+    val p2 = ""p2""
+
+    TailArgs()
+    if (ctorArgs.size != 0) return ""fail2: $ctorArgs arguments instead 0""
+
+    TailArgs(p2 = p2)
+    if (ctorArgs.size != 3 || ctorArgs[2] != p2) return ""fail3: $ctorArgs arguments instead 3""
+
+    return ""OK""
+}","// EXPECTED_REACHABLE_NODES: 1239
+// FILE: main.kt",4f27
+fun test(lock: Any),"{
+    val x: Int
+
+    synchronized(lock) {
+        x = 42
+    }","// FIR_IDENTICAL
+// !LANGUAGE: +ReadDeserializedContracts +UseCallsInPlaceEffect",cd69
+fun foo(),{},"// FIR_IDENTICAL
+// !DIAGNOSTICS:-UNUSED_VARIABLE",519f
+fun test(),": String = ""","// MODULE: lib
+// FILE: l1.kt",fe98
+"fun <T> select(x: T, y: T)",: T = x,// !DIAGNOSTICS: -UNUSED_PARAMETER -UNUSED_EXPRESSION,c16c
+fun TopAppBar(title: String),"{
+}","// MODULE: main(lib)
+// FILE: main.kt",c536
+fun foo(),": CharSequence?
+}
+
+interface A : Common {
+    override : CharSequence
+}",// !CHECK_TYPE,519f
+fun foo(s: String),{},"// TARGET_BACKEND: JVM
+// FILE: Test.java",b751
+fun test(targetString: String),": String {
+    val json = Json { encodeDefaults = true }",// WITH_STDLIB,0630
+"fun registerFile(firFile: FirFile, irFile: IrFile)","{
+        fileCache[firFile] = irFile
+    }","// Make sure that external package fragments have a different module descriptor. The module descriptors are compared
+        // to determine if objects need regeneration because they are from different modules.
+        // But keep the original module descriptor for the fragments coming from parts compiled on the previous incremental step",5fa6
+fun originalDeclarationForDelegated(irDeclaration: IrDeclaration),": FirDeclaration? {
+        return delegatedReverseCache[irDeclaration.symbol]
+    }",// ------------------------------------ callables ------------------------------------,d1dd
+fun test(d: Derived),"{
+         *     d.foo()
+         * }",// (2),37e1
+fun bar(),"{
+     *     1.let { // (2)
+     *         <context of code fragment>
+     *     }",// (1),66c3
+fun foo(),"{
+        foo = 5
+        foo
+    }","// JVM_ABI_K1_K2_DIFF: KT-63850, KT-63854",519f
+fun scheduleRefresh(vararg files : Object),"{
+    ArrayList<Object>(files.map { it }","// TARGET_BACKEND: JVM
+// TARGET_BACKEND: JVM_IR
+// not sure if it's ok to change Object to Any
+
+// WITH_STDLIB",1921
+fun invoke(),"{
+    }","// FIR_IDENTICAL
+// !LANGUAGE: +SuspendFunctionAsSupertype
+// SKIP_TXT
+// DIAGNOSTICS: -CONFLICTING_INHERITED_MEMBERS, -CONFLICTING_OVERLOADS, -ABSTRACT_MEMBER_NOT_IMPLEMENTED, -ABSTRACT_CLASS_MEMBER_NOT_IMPLEMENTED",0a26
+fun box(),": String {
+    val p = Triple(""X"",""O"",""K"")
+
+    val
+            (
+        _
+            ,
+        o
+            ,
+        k
+    )
+    =
+        p
+
+    return o + k
+}","// WITH_STDLIB
+
+
+// FILE: test.kt",4f27
+fun setupTransform(project: Project),"{
+        project.dependencies.artifactTypes.maybeCreate(""tar.gz"").also { artifactType ->
+            artifactType.attributes.setAttribute(attribute, KotlinNativeBundleArtifactsTypes.ARCHIVE)
+        }","/**
+     * Sets up the necessary transformations for handling artifact types ""tar.gz"" and ""zip"" in the given project.
+     *
+     * @param project The project in which to set up the transformations.
+     */",d3ba
+fun outer(),"{
+    typealias Test1 = <!UNRESOLVED_REFERENCE!>Test1<!>
+    typealias Test2 = List<<!UNRESOLVED_REFERENCE!>Test2<!>>
+    typealias Test3<T> = List<<!UNRESOLVED_REFERENCE!>Test3<!><T>>
+}",// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_PARAMETER -TOPLEVEL_TYPEALIASES_ONLY,59f5
+fun run(),"}
+
+// Function is NOT suspend
+// parameter is noinline
+// parameter is suspend
+// Block is NOT allowed to be called inside the body of owner inline function
+// Block is allowed to be called from nested classes/lambdas (as common crossinlines)
+// It is possible to call startCoroutine on the parameter
+// suspend calls possible inside lambda matching to the parameter
+
+inline fun test(noinline c: suspend () -> Unit)  {
+    <!ILLEGAL_SUSPEND_FUNCTION_CALL!>c<!>()
+    val o = object : SuspendRunnable {
+        override suspend  {
+            c()
+        }","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_PARAMETER -NOTHING_TO_INLINE
+// SKIP_TXT
+// WITH_COROUTINES",354f
+fun testIn(x: ULong),"=
+    x",// WITH_STDLIB,a735
+fun foo(),{},"// TARGET_BACKEND: JVM
+
+// WITH_STDLIB",519f
+fun foo(),"<!EXPECTED_PRIVATE_DECLARATION, EXPECTED_PRIVATE_DECLARATION{JVM}","// MODULE: m1-common
+// FILE: common.kt",519f
+fun f(arg: Int),= a,// LANGUAGE: +ContractSyntaxV2,f887
+fun box(),": String {
+    if (!Modifier.isPublic(IC1::class.java.declaredMethods.single { it.name == ""constructor-impl"" }","// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// FULL_JDK
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",4f27
+fun test(),"{
+    val buildee = build {
+        class ConcreteType
+        class TargetType {
+            fun consumeConcreteType(value: ConcreteType) {}",// ISSUE: KT-60447,fe98
+fun foo(t: T),{},"// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER",6c6b
+fun box(),": String {
+    return inlineFun {
+        this + ""K""
+    }",// FILE: 2.kt,4f27
+fun box(),"=
+    i","// TARGET_BACKEND: JVM
+// MODULE: lib
+// FILE: R.java",4f27
+fun foo(),"{
+    JavaEnum.A.get<caret>Name()
+}",// FILE: JavaEnum.java,519f
+fun box(),": String {
+    val m = Map2()
+    if (m.entries.size != 0) return ""fail 1""
+
+    m.put(""56"", ""OK"")
+    val x = m.entries.iterator().next()
+
+    if (x.key != ""56"" || x.value != ""OK"") return ""fail 2""
+
+    return ""OK""
+}","// IGNORE_BACKEND: WASM
+// WASM_MUTE_REASON: STDLIB_COLLECTION_INHERITANCE
+// KJS_WITH_FULL_RUNTIME
+// DONT_TARGET_EXACT_BACKEND: NATIVE",4f27
+fun fn0(),{},"// DONT_TARGET_EXACT_BACKEND: JS
+// DONT_TARGET_EXACT_BACKEND: JS_IR
+// DONT_TARGET_EXACT_BACKEND: JS_IR_ES6
+// WITH_REFLECT",6732
+fun ln(x: Double),: Double = n,"/**
+ * Computes the natural logarithm (base `E`) of the value [x].
+ *
+ * Special cases:
+ *   - `ln(NaN)` is `NaN`
+ *   - `ln(x)` is `NaN` when `x < 0.0`
+ *   - `ln(+Inf)` is `+Inf`
+ *   - `ln(0.0)` is `-Inf`
+ */",70e5
+fun ln(x: Float),: Float = n,"/**
+ * Computes the natural logarithm (base `E`) of the value [x].
+ *
+ * Special cases:
+ *   - `ln(NaN)` is `NaN`
+ *   - `ln(x)` is `NaN` when `x < 0.0`
+ *   - `ln(+Inf)` is `+Inf`
+ *   - `ln(0.0)` is `-Inf`
+ */",e2ff
+fun generate(codegen: CodeGenerator),"{
+        if (!target.family.isAppleFamily) return
+
+        if (generationState.shouldDefineFunctionClasses) {
+            ObjCExportBlockCodeGenerator(codegen).generate()
+        }",// TODO: No need for such class in dynamic driver.,be68
+fun foo(),: Int = 1,// NI_EXPECTED_FILE,519f
+fun case_1(value_1: Int),": String {
+    while (true) {
+        when (value_1) {
+            break -> return """"
+        }",// SKIP_TXT,4991
+fun test(),"{
+    A.entries
+
+    with(A) {
+        entries
+    }","// !LANGUAGE: +EnumEntries +PrioritizedEnumEntries
+// WITH_STDLIB
+// FIR_DUMP",fe98
+fun t(),= d,"// FIR_IDENTICAL
+// FILE: a/b/c.java",8234
+fun test(),"{
+    A::class
+    A.<!DEPRECATION!>Companion<!>::class
+}","// FIR_IDENTICAL
+// ISSUE: KT-54209",fe98
+fun suspendHere(x: String),": Unit {
+    log += ""suspendHere($x);""
+    return suspendCoroutineUninterceptedOrReturn { c ->
+        postponed = { c.resume(Unit) }","// WITH_STDLIB
+// WITH_COROUTINES",4187
+fun get(s: Int),= 1,// WITH_STDLIB,4037
+fun <R> choose1(c: Out<Out<R>>),{},// !DIAGNOSTICS: -UNUSED_PARAMETER,80da
+fun box(),": String {
+    assertEquals(ln1p(-2.0), Double.NaN)
+    assertEquals(ln1p(-1.0), Double.NEGATIVE_INFINITY)
+    assertEquals(ln1p(0.0), 0.0)
+    assertEquals(ln1p(1.0), 0.6931471805599453)
+    assertEquals(js(""Math.log1p.called""), true)
+
+    return ""OK""
+}","// WITH_STDLIB
+// TARGET_BACKEND: JS_IR
+// FILE: main.js",4f27
+fun testEmptyString(),"{
+    js(<!JSCODE_NO_JAVASCRIPT_PRODUCED!>""""<!>)
+}","// FIR_IDENTICAL
+// ERROR_POLICY: SEMANTIC",768d
+fun box(),"=
+        B",// FILE: test.kt,4f27
+fun box(),": String {
+    assertEquals<Int>(2, WithCompanion.c, ""Field WithCompanion.c"")
+    assertEquals<Int>(2, Object.c, ""Field Object"")
+    return ""OK""
+}","// TARGET_BACKEND: JVM
+// WITH_STDLIB",4f27
+fun simple(),: String = i,"// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// IGNORE_BACKEND: JVM
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",4e1d
+fun simpleFun(),{},"//class `:)` {
+//    lateinit var f: String
+//}
+
+// Commented declarations won't compile with the current Kotlin",d415
+fun case_1(value_1: SealedClass),: Int = w,"// !DIAGNOSTICS: -UNUSED_EXPRESSION
+// SKIP_TXT",df4a
+fun A3(x: Any),"= ""","// !DIAGNOSTICS: -UNUSED_PARAMETER -UNUSED_VARIABLE
+// !CHECK_TYPE
+// FILE: a.kt",9dd7
+fun <T> dispatchInline(),: T = (,"// NO_CHECK_LAMBDA_INLINING
+// !LANGUAGE: +InlineClasses
+
+// FILE: inline.kt",bacc
+fun test1(),"{
+        <!DEPRECATED_ACCESS_BY_SHORT_NAME!>foo()<!>
+        bar()
+        val a: Int = <!TYPE_MISMATCH!>baz()<!>
+        val b: T = baz()
+    }","// !LANGUAGE: -ProhibitVisibilityOfNestedClassifiersFromSupertypesOfCompanion
+// !DIAGNOSTICS: -UNUSED_VARIABLE
+
+// FILE: J.java",fa3b
+fun box(),": String {
+    val entries = MyEnum.entries
+    val entry = entries[0]
+    require(java.util.concurrent.TimeUnit.entries.size == java.util.concurrent.TimeUnit.values().size)
+    return entry.toString()
+}","// !LANGUAGE: +EnumEntries
+// TARGET_BACKEND: JVM_IR
+// FULL_JDK
+// WITH_STDLIB
+
+// FILE: MyEnum.java",4f27
+fun assertEnabled(),"{
+    assertFailsWith<AssertionError> {
+        @OptIn(kotlin.experimental.ExperimentalNativeApi::class)
+        assert(false)
+    }",// ASSERTIONS_MODE: always-enable,ce75
+fun foo(x: T),"fun interface IFoo<T> {
+    : T
+}","// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+
+// CHECK_BYTECODE_TEXT
+// JVM_IR_TEMPLATES
+// 1 java/lang/invoke/LambdaMetafactory",a834
+fun myAssert(condition: Boolean),"{
+    contract {
+        returns() implies (condition)
+    }","// !LANGUAGE: +AllowContractsForCustomFunctions +UseReturnsEffect
+// !OPT_IN: kotlin.contracts.ExperimentalContracts
+// !DIAGNOSTICS: -INVISIBLE_REFERENCE -INVISIBLE_MEMBER",e0bd
+fun copyInSameArray(),": CustomArray<Int> {
+        val array = CustomArray<Int>()
+        for (i in 0 until 2 * BENCHMARK_SIZE) {
+            array.add(0, i)
+        }",// Shift the array if needed.,c2b3
+fun f(),"{
+    invoker(
+    l@{
+        return@l 11 // expects Function, but should expect Int
+    }",//kt-411 Wrong type expected when returning from a function literal,f6fb
+fun t1(),"{
+    val v = l@{
+        return@l 111
+    }",//more tests,9870
+fun foo(s: S<String>),": String {
+    class Local {
+        fun bar() = s.string
+    }","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",a673
+fun box(),": String =
+    ""","// TARGET_BACKEND: JVM
+// WITH_STDLIB
+
+// FILE: anonymousObject.kt",4f27
+fun main(args: Array<String>),"{
+    val comparator = <!FUNCTION_CALL_EXPECTED!><!NO_VALUE_FOR_PARAMETER!>Comparator<!><Long?><!>
+}",// ISSUE: KT-54874,5b61
+fun box(),": String {
+    val bs1 = B(15)
+    assertEquals(90, bs1.value)
+
+    val bs2 = B()
+    assertEquals(72 * 18, bs2.value)
+
+    return ""OK""
+}",// EXPECTED_REACHABLE_NODES: 1344,4f27
+fun a(),": String {
+        return ""OK""
+    }","// TARGET_BACKEND: JVM
+
+// WITH_STDLIB",9ea5
+fun funInCompanion(),{},// !LANGUAGE: +InlineClasses,a4d5
+"fun foo(a: A, ka: KA)","{
+    ka.contains("""")
+    ka.contains(<!CONSTANT_EXPECTED_TYPE_MISMATCH!>1<!>)
+    """" in ka
+    <!CONSTANT_EXPECTED_TYPE_MISMATCH!>1<!> in ka
+}","// !DIAGNOSTICS: -UNUSED_PARAMETER -UNUSED_VARIABLE -PARAMETER_NAME_CHANGED_ON_OVERRIDE
+// SCOPE_DUMP: KA:contains
+
+// FILE: A.java",ab44
+fun foo(),<!> = 2,// FIR_IDENTICAL,519f
+fun bar(),": Any
+}
+
+interface IFoo : IBar {
+    fun foo(): Any
+    override : X<String>
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",66c3
+fun <T> magic(),: T = n,// !CHECK_TYPE,dd70
+fun foo(x: String),": String
+}
+
+class BaseImpl(val s: String) : Base {
+    override : String = ""Base: ${s}",// EXPECTED_REACHABLE_NODES: 1293,f5be
+fun box(),": String {
+    val f = A::class.constructors.single()
+    val parameters = f.parameters
+
+    f.callBy(mapOf(
+            *((1..70)).map { i -> parameters[i - 1] to i }","// TARGET_BACKEND: JVM
+// WITH_REFLECT",4f27
+fun box(),": String {
+    var sum = 0u
+    for (el in arrayOf(1u, 2u, 3u)) {
+        sum += el
+    }",// WITH_STDLIB,4f27
+fun bar11(foo: Foo),"{
+        foos.add(Foo(HashMap(foo.attributes))) // foo.attributes is unresolved but not marked
+    }","// FIR_IDENTICAL
+//KT-3344 InternalError in compiler when type arguments are not specified",9b33
+fun typed(),: T = a,"// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",a6e7
+fun tenUInt(),= 1,"// KJS_WITH_FULL_RUNTIME
+// EXPECTED_REACHABLE_NODES: 1625
+// MODULE: lib
+// FILE: lib.kt",567c
+fun main(args: Array<String>),"{
+    print(args[0]);
+}",// MAIN_ARGS: [Hello_world!],5b61
+fun breakContinueInWhen(i: Int),"{
+    for (y in 0..10) {
+        when(i) {
+            0 -> <!BREAK_OR_CONTINUE_IN_WHEN!>continue<!>
+            1 -> <!BREAK_OR_CONTINUE_IN_WHEN!>break<!>
+            2 -> {
+                for(z in 0..10) {
+                    break
+                }",// !LANGUAGE: -AllowBreakAndContinueInsideWhen,fb04
+fun k(),"= ""","// Fails on native when run with `-Pkotlin.internal.native.test.cacheMode=STATIC_EVERYWHERE`.
+// Looks like the call to `k` fails as `k` is not exported from the lib module.
+// IGNORE_NATIVE: cacheMode=STATIC_EVERYWHERE
+// IGNORE_NATIVE: cacheMode=STATIC_PER_FILE_EVERYWHERE
+// IGNORE_NATIVE: cacheMode=STATIC_USE_HEADERS_EVERYWHERE
+// MODULE: lib
+// FILE: Z.kt",20fe
+fun Inner(x: String),{},"// !DIAGNOSTICS: -UNUSED_PARAMETER
+// SKIP_TXT
+// FILE: Outer.kt",e120
+fun bar(),"{
+    Inner<!NO_VALUE_FOR_PARAMETER!>()<!>
+    Inner(<!CONSTANT_EXPECTED_TYPE_MISMATCH!>1<!>)
+    Inner("""")
+
+    with(Outer()) {
+        Inner()
+        Inner(1)
+        Inner("""")
+    }",// FILE: imported.kt,66c3
+fun incI(),"{
+    i++
+}","// EXPECTED_REACHABLE_NODES: 1289
+// http://youtrack.jetbrains.com/issue/KT-4225
+// Compiler to JavaScript produces semantically wrong code",94f1
+fun box(),": String {
+    return Foo.FOO.value
+}","// !LANGUAGE: +JvmFieldInInterface +NestedClassesInAnnotations
+// TARGET_BACKEND: JVM
+
+// WITH_STDLIB
+// FILE: Foo.kt",4f27
+fun compute(),": String {
+    var result = """"
+    for (x in listOf(""A"", ""B"")) {
+        try {
+            val y = ""y""
+            result += y
+            return result
+        }","// WITH_STDLIB
+// FILE: test.kt",cd3b
+fun createS64(),": S64 {
+    val s2 = S2(0, 0)
+    val s4 = S4(s2, s2)
+    val s8 = S8(s4, s4)
+    val s16 = S16(s8, s8)
+    val s32 = S32(s16, s16)
+    return S64(s32, s32)
+}","// TARGET_BACKEND: JVM_IR
+// WITH_REFLECT
+// LANGUAGE: +ValueClasses",ce7e
+fun box(),"{
+    val a = A()
+    val b = B(4)
+    val c = C()
+    val foo = G(Int::class)
+}","// FIR_IDENTICAL
+// WITH_STDLIB
+// SKIP_TXT
+// !LANGUAGE: +InstantiationOfAnnotationClasses",4f27
+fun id(),= t,// !DIAGNOSTICS: -UNUSED_PARAMETER -UNUSED_VARIABLE,9d99
+fun foo(),"}
+
+<!WRONG_MODIFIER_TARGET!>inline<!> external enum class <!ENUM_CLASS_IN_EXTERNAL_DECLARATION_WARNING, WRONG_EXTERNAL_DECLARATION!>E<!> {
+    A
+}","// FIR_IDENTICAL
+// !LANGUAGE: +InlineClasses, -JvmInlineValueClasses, +JsExternalPropertyParameters
+// !DIAGNOSTICS: +ENUM_CLASS_IN_EXTERNAL_DECLARATION_WARNING",519f
+fun main(),"{
+    iFlow { emit(1) }","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER
+// !OPT_IN: kotlin.RequiresOptIn",d987
+fun apply(s: S),"fun interface F<S> {
+    
+}","// FIR_IDENTICAL
+// !LANGUAGE: +SamConversionForKotlinFunctions +SamConversionPerArgument +FunctionalInterfaceConversion
+// !CHECK_TYPE",ae58
+fun test(),"{
+    val map = emptyMap<Int, Int>()
+    var optimized = """"
+    for (i in 0..map.size - 1) optimized += map[i]
+}",// TARGET_BACKEND: JVM_IR,fe98
+fun bar(),{},"// !LANGUAGE: -ProhibitVisibilityOfNestedClassifiersFromSupertypesOfCompanion
+// FILE: J.java",66c3
+fun f(a: List<Any>),= a,// FIR_IDENTICAL,444e
+fun play(),"{
+        ReentrantLock().withLock {
+            launch {
+                pumpEvents()
+            }","// FIR_IDENTICAL
+// ISSUE: KT-55072",69f4
+fun bar2(),: Int = 1,"// WITH_STDLIB
+// SKIP_TXT
+// !DIAGNOSTICS: -CAST_NEVER_SUCCEEDS -UNCHECKED_CAST -UNUSED_PARAMETER -UNUSED_VARIABLE -OPT_IN_USAGE_ERROR -UNUSED_EXPRESSION",3846
+fun suspendThere(v: String),: String = s,"// TARGET_BACKEND: JVM
+// FULL_JDK
+// WITH_STDLIB
+// WITH_COROUTINES
+// CHECK_TAIL_CALL_OPTIMIZATION
+// JVM_ABI_K1_K2_DIFF: KT-63864",4d2d
+fun test(),"{
+    Parent.a
+    Parent.a = 11
+    Parent.b
+    Parent.b = 22
+    Parent.foo()
+    Parent.baz()
+
+    Child.a
+    Child.a = 33
+    Child.b
+    Child.b = 44
+    Child.c
+    Child.c = 55
+    Child.foo()
+    Child.bar()
+    Child.baz()
+}",// FILE: Child.java,fe98
+"fun onInserted(position: Int, count: Int)",{},"// STRIP_METADATA
+// TODO: Re-enable metadata generation",7a45
+"fun subSequence(startIndex: Int, endIndex: Int)",= T,// WITH_STDLIB,fe95
+fun existingMethod(),"val existingParam: Int
+}
+
+// MODULE: m2-jvm()()(m1-common)
+// FILE: jvm.kt
+
+open class InjectedEmptySuperClass()
+
+actual open class Foo : InjectedEmptySuperClass() {
+    actual  {}","// FIR_IDENTICAL
+// MODULE: m1-common
+// FILE: common.kt",6c23
+fun example(),"{
+    val a = if (true) true else false
+    val b = <!INVALID_IF_AS_EXPRESSION!>if<!> (true) else false
+    val c = <!INVALID_IF_AS_EXPRESSION!>if<!> (true) true
+    val d = <!INVALID_IF_AS_EXPRESSION!>if<!> (true) true else;
+    val e = if (true) {}",// !DIAGNOSTICS: -UNUSED_VARIABLE,29b8
+fun box(),": String {
+    var r = test()
+    if (r != ""01"") throw AssertionError(r.toString())
+    return ""OK""
+}",// WITH_STDLIB,4f27
+fun box(),": String {
+    for (i in 1..7 step 2) {
+    }","// TARGET_BACKEND: JVM_IR
+
+// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",4f27
+fun test(list: ArrayList<Some>),"{
+    JavaClass.foo(list)
+}","// FULL_JDK
+// FILE: JavaClass.java",cdc5
+fun foo(),= 1,"// FIR_IDENTICAL
+// !LANGUAGE: +ContextReceivers",519f
+fun foo(),"{
+    val result: A<String> = A<String> { x, y -> 1 }","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_ANONYMOUS_PARAMETER
+
+// FILE: A.java",519f
+fun test(),"{
+        foo()
+    }",// FILE: a.kt,fe98
+fun foo(),"{
+        result = ""OK""
+    }",// FILE: b.kt,519f
+fun foo(),": String
+}
+
+interface CompositeCodeBlock: CodeBlock {
+    override : String {
+        return ""OK""
+    }","// MODULE: lib
+// FILE: A.kt",519f
+fun test(),": String {
+        return a + inlineFun()
+    }","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",fe98
+fun foo(),{},// FILE: a.kt,519f
+fun box(),": String {
+    val list1 = ArrayList<Int>()
+    val range1 = 8 downTo 3 step 2
+    for (i in range1) {
+        list1.add(i)
+        if (list1.size > 23) break
+    }","// Auto-generated by org.jetbrains.kotlin.generators.tests.GenerateRangesCodegenTestData. DO NOT EDIT!
+// WITH_STDLIB",4f27
+fun t<caret>tt(),"{
+    @Anno(""property $prop"")
+    var <@Anno(""type parameter $prop"") T : @Anno(""bound $prop"") List<@Anno(""nested bound $prop"") String>> @receiver:Anno(""receiver $prop"") @Anno(
+        ""receiver type $prop""
+    ) List<@Anno(""nested receiver type $prop"")>.variableToResolve: @Anno(""return type $prop"") Collection<@Anno(""nested return type $prop"") List<@Anno(
+        ""nested nested return type $prop""
+    ) Int>>
+    @Anno(""getter $prop"")
+    get() = ""str""
+    @Anno(""setter $prop"")
+    set(@Anno(""setter parameter $prop"") value) = Unit
+}",// BODY_RESOLVE,0146
+fun foo(),": String = ""","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",519f
+fun generateComponentFunctions(),"{
+            var componentIndex = 1
+            for ((sourceNode, firProperty) in zippedParameters) {
+                if (!firProperty.isVal && !firProperty.isVar) continue
+                val name = Name.identifier(""component$componentIndex"")
+                componentIndex++
+                val componentFunction = buildSimpleFunction {
+                    source = sourceNode?.toFirSourceElement(KtFakeSourceElementKind.DataClassGeneratedMembers)
+                    moduleData = baseModuleData
+                    origin = FirDeclarationOrigin.Synthetic.DataClassMember
+                    returnTypeRef = firProperty.returnTypeRef.copyWithNewSourceKind(KtFakeSourceElementKind.DataClassGeneratedMembers)
+                    this.name = name
+                    status = FirDeclarationStatusImpl(firProperty.visibility, Modality.FINAL).apply {
+                        isOperator = true
+                    }","// Refer to (IR utils or FIR backend) DataClassMembersGenerator for generating equals, hashCode, and toString",c9e8
+fun foo(),{},"// FIR_IDENTICAL
+//KT-2069 Cannot call super method when superclass has type parameters",519f
+fun box(),": String {
+    return test(Foo(""OK"")::a)
+}",// FILE: 2.kt,4f27
+fun box(),": String {
+    val x = MyNumber('*'.code).toChar()
+    if (x != '*') return ""Fail 1: $x""
+
+    val y = java.lang.Integer('+'.code).toChar()
+    if (y != '+') return ""Fail 2: $y""
+
+    return ""OK""
+}","// TARGET_BACKEND: JVM_IR
+// ISSUE: KT-23447
+// WITH_STDLIB
+
+// FILE: MyNumber.java",4f27
+fun bar(),": String = ""","// EXPECTED_REACHABLE_NODES: 1265
+// RUN_PLAIN_BOX_FUNCTION
+// INFER_MAIN_MODULE
+// SKIP_MINIFICATION
+// SKIP_NODE_JS
+// SKIP_DCE_DRIVEN
+
+// MODULE: exportProtectedMembers
+// FILE: lib.kt",66c3
+fun foo(),{},"// FIR_IDENTICAL
+// ISSUE: KT-57211",519f
+fun foo(),: Char = ',// EXPECTED_REACHABLE_NODES: 1293,519f
+fun get(i: Int),= 0,// !DIAGNOSTICS: -UNUSED_PARAMETER,e829
+fun box(),": String {
+    assertEquals(3, A::class.constructors.size)
+    assertEquals(1, B::class.constructors.size)
+
+    assertTrue(Collections.disjoint(A::class.members, A::class.constructors))
+    assertTrue(Collections.disjoint(B::class.members, B::class.constructors))
+
+    assertEquals(1, C.Nested::class.constructors.size)
+    assertEquals(1, C.Inner::class.constructors.size)
+
+    return ""OK""
+}","// TARGET_BACKEND: JVM
+
+// WITH_REFLECT",4f27
+fun getPackage(),= j,// EXPECTED_REACHABLE_NODES: 1303,5656
+fun memberFun(),"val memberProp: Int
+    class Nested
+    inner class Inner
+}
+actual <!EXPECT_AND_ACTUAL_IN_THE_SAME_MODULE!>class CommonClass<!> {
+    actual  {}","// MODULE: common
+// TARGET_PLATFORM: Common",a83f
+fun <K> id(x: K),: K = x,"// TARGET_BACKEND: JVM_IR
+// IGNORE_BACKEND_K1: JVM_IR",cbda
+fun suspendWithValue(v: String),: String = s,"// WITH_STDLIB
+// WITH_COROUTINES
+// JVM_ABI_K1_K2_DIFF: KT-63864",57d2
+fun main(args: Array<String>),"{
+    for (arg in args)
+        println(arg)
+
+    // or
+    println()
+    for (i in args.indices)
+        println(args[i])
+}","// MAIN_ARGS: [a,b,c]",5b61
+fun test(),"= """,// FIR_IDENTICAL,fe98
+fun intArray(),= i,"// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",3346
+fun foo(),= 1,"// FIR_IDENTICAL
+// Functions can be recursively annotated",519f
+fun applySomething(build: Build),= w,"// JVM_ABI_K1_K2_DIFF: KT-63960, KT-63963, KT-63964",d498
+fun box(),= O,// !LANGUAGE: +ProperVisibilityForCompanionObjectInstanceField,4f27
+fun box(),": String {
+    z = Test(1)
+    z += 1
+    if (result.result != 2) return ""fail 1: ${result.result}",// FILE: 2.kt,4f27
+fun f(),{},"// TARGET_BACKEND: JVM
+// LANGUAGE: +MultiPlatformProjects
+// MODULE: m1-common
+// FILE: common.kt",f6fb
+fun box(),": String {
+    val t1: Any = ""3""
+    val t2: Any = 3
+    val t3: Any = ""4""
+    val t4: Any = 4
+    if (t3 == t4) return ""fail""
+    return if (t1 != t2) ""OK"" else ""fail""
+}",// EXPECTED_REACHABLE_NODES: 1280,4f27
+fun <T> id(x: T),: T = x,"// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",2066
+fun bar(j: J),= <,"// SKIP_TXT
+// !LANGUAGE: -EnhanceNullabilityOfPrimitiveArrays
+// FILE: J.java",bb32
+fun <T> refreshOnUpdate(initialValue: T),= R,"// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER",8827
+fun foo(),": Int {
+    var sum = 0
+    for (c in ""239"")
+        sum += (c.toInt() - '0'.toInt())
+    return sum
+}",// WITH_STDLIB,519f
+fun foo(),": Int {
+    return when (J.create()) {
+        J.A -> 1
+        J.B -> 2
+        else -> 0
+    }",// FIR_IDENTICAL,519f
+fun foo(),"}
+
+fun box(): String {
+    try {
+        WithNative().foo()
+        return ""Link error expected""
+    }","// TARGET_BACKEND: JVM
+// IGNORE_BACKEND: ANDROID
+
+// FULL_JDK",519f
+fun box(),": String {
+    val ok = Result.success(""OK"")
+    return ok.getOrNull()!!
+}",// WITH_STDLIB,4f27
+fun yield(k: K),{},// ISSUE: KT-65341,ffca
+fun exportedFun(),= 1,"// CHECK_TYPESCRIPT_DECLARATIONS
+// RUN_PLAIN_BOX_FUNCTION
+// SKIP_MINIFICATION
+// SKIP_NODE_JS
+// INFER_MAIN_MODULE
+
+// MODULE: JS_TESTS
+// FILE: file1.kt",b752
+"fun execFullPathsInMessages(errStream: PrintStream, args: Array<String>)",": ExitCode {
+        return exec(errStream, Services.EMPTY, MessageRenderer.PLAIN_FULL_PATHS, args)
+    }",// Used via reflection in KotlinCompilerBaseTask,151b
+fun existingMethodInBase(),"}
+
+expect open class Foo : Base {
+    fun existingMethod()
+    val existingParam: Int
+}","// WITH_STDLIB
+// MODULE: m1-common
+// FILE: common.kt",d06e
+fun existingMethodInBase(),{},"// MODULE: m2-jvm()()(m1-common)
+// FILE: jvm.kt",d06e
+fun foo(list: List<Int>),"{
+    val result: List<String> = list.map { a<caret>v }","// WITH_STDLIB
+// IGNORE_FE10",8ac6
+fun box(),": String {
+    assertEquals(atanh(-1.0), Double.NEGATIVE_INFINITY)
+    assertEquals(atanh(0.0), 0.0)
+    assertEquals(atanh(0.5), 0.5493061443340548)
+    assertEquals(atanh(1.0), Double.POSITIVE_INFINITY)
+
+    assertEquals(js(""Math.atanh.called""), true)
+
+    return ""OK""
+}","// WITH_STDLIB
+// TARGET_BACKEND: JS_IR
+// FILE: main.js",4f27
+fun foo(),= b,// FIR_IDENTICAL,519f
+fun foo(),: Int = 0,// !DIAGNOSTICS: -UNUSED_EXPRESSION -UNUSED_PARAMETER,519f
+fun plus(x : String),": MyString {
+        s += x
+        return this
+    }",//KT-3869 Loops and finally: outer finally block not run,e6e1
+fun box(),": String {
+    var result = """"
+    // See KT-14399
+    listOf(Station(""O"", ""K"", 56)).forEachIndexed { i, (id, name, distance) -> result += ""$id$name$distance"" }",// WITH_STDLIB,4f27
+fun get(),"fun interface Sam<T> {
+    : T
+}","// KOTLIN_CONFIGURATION_FLAGS: SAM_CONVERSIONS=CLASS
+// WITH_SIGNATURES
+// FILE: t.kt",7383
+fun <R> select(vararg x: R),= x,"// !DIAGNOSTICS: -UNUSED_PARAMETER
+// Issues: KT-36816",1050
+fun runTest1(),"{
+    val worker = Worker.start()
+
+    assertEquals(1, topInt)
+    assertEquals(""string"", topString)
+    assertEquals(42, topData.x)
+    assertEquals(43, topSharedData.x)
+    assertEquals(""top"", topSharedStringWithGetter)
+
+    worker.execute(TransferMode.SAFE, { -> }","// OUTPUT_DATA_FILE: worker10.out
+// DISABLE_NATIVE: gcType=NOOP
+// FREE_COMPILER_ARGS: -opt-in=kotlin.experimental.ExperimentalNativeApi,kotlin.native.runtime.NativeRuntimeApi,kotlinx.cinterop.ExperimentalForeignApi",572a
+fun <T> listOf(),: List<T> = n,"// !CHECK_TYPE
+// !DIAGNOSTICS: -UNUSED_PARAMETER -UNUSED_ANONYMOUS_PARAMETER -UNUSED_VARIABLE",313f
+fun get(),": Step
+}
+
+class Outer(val k: String) {
+    val obj = object : GetStep {
+        override : Step = Step(::test)
+    }","// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+
+// FILE: privateOuterClassMemberFun.kt",7383
+fun foo(),"= ""","// WITH_STDLIB
+// TARGET_BACKEND: JS_IR
+// TARGET_BACKEND: JS_IR_ES6
+// RUN_PLAIN_BOX_FUNCTION
+// INFER_MAIN_MODULE
+
+// MODULE: lib
+// FILE: lib.kt",519f
+fun bar(),{},"// ISSUE: KT-46072
+
+// Case 1",66c3
+fun box(),": String {
+    val p = J::foo
+    assertEquals(""foo"", p.name)
+
+    val j = J()
+    p.set(j, ""OK"")
+    return p.get(j)
+}","// TARGET_BACKEND: JVM
+// !LANGUAGE: +ReferencesToSyntheticJavaProperties
+
+// WITH_STDLIB
+// FILE: J.java",4f27
+fun box(),": String {
+    return if (D(0).b == 2) ""OK"" else ""fail""
+}",// EXPECTED_REACHABLE_NODES: 1289,4f27
+fun contains(element: T),": Boolean {
+        TODO(""Not yet implemented"")
+    }","// WITH_STDLIB
+
+// FILE: test/B.java",4930
+fun zzz(value: T),": Unit
+}
+
+class Bbb<T>() : Aaa<T> {
+    override  { }",// FIR_IDENTICAL,2fe1
+fun pi_fun(),{},//------------,9948
+fun f(),= o,"// EXPECTED_REACHABLE_NODES: 1302
+// MODULE: lib
+// FILE: lib.kt",f6fb
+fun o(),{},"// SKIP_WHEN_OUT_OF_CONTENT_ROOT
+// MODULE: lib
+// MODULE_KIND: LibraryBinary
+// FILE: lib.kt",1549
+fun test(),= B,// FIR_IDENTICAL,fe98
+fun foo(),": String
+}
+
+<!APPROXIMATED_LOCAL_TYPE_WILL_BECOME_NULLABLE!>fun bar(condition: Boolean)<!> /*: I? */ =
+    i","// ISSUE: KT-30054
+// !LANGUAGE: -KeepNullabilityWhenApproximatingLocalType",519f
+fun foo(),"{
+    test().
+    test().
+    fail()
+}",// WITH_STDLIB,519f
+fun toString(),= s,"// EXPECTED_REACHABLE_NODES: 1117
+// IGNORE_BACKEND: JS",a535
+fun case1(),"{
+    <!DEBUG_INFO_CALL(""fqName: libPackageCase1.listOf; typeCall: function"")!>listOf(elements = arrayOf(1))<!>
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE -ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE -UNUSED_VALUE -UNUSED_PARAMETER -UNUSED_EXPRESSION
+// SKIP_TXT",7602
+fun <T> listOf(vararg elements: T),: List<T> = T,// FILE: Lib1.kt,c1aa
+fun box(),": String {
+    var foo = { 1 }",//KT-4656 Wrong capturing a function literal variable,4f27
+fun box(),": String {
+    val a: A<String> = B()
+    a.x = ""OK""
+    return a.x
+}","// JVM_ABI_K1_K2_DIFF: KT-63850, KT-63854",4f27
+"fun removeRange(fromIndex: Int, toIndex: Int)",fun addAll(elements: FastArrayList<E>): Boolean = a,"// FIR_IDENTICAL
+// WITH_STDLIB
+
+// MODULE: m1-common
+// FILE: common.kt",4fa1
+fun foo(),"}
+    }
+}
+
+// MODULE: m1-jvm()()(m1-common)
+// FILE: jvm.kt
+actual class A {
+    actual class B {
+        actual class C {
+            actual fun <!ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT!>foo<!>() {}","// MODULE: m1-common
+// FILE: common.kt",519f
+fun box(),": String {
+    return Z().f()
+}","// TARGET_BACKEND: JVM_IR
+// ISSUE: KT-65592
+
+// FILE: A.java",4f27
+fun foo(),"{
+    p<caret>rintln()
+}","// MODULE: dependency
+// MODULE_KIND: LibraryBinary
+// FILE: Declaration.kt",519f
+fun box(),": String {
+    val c = 3
+    val d = 5
+    var z = 0
+    when(c) {
+        5, 3 -> z++;
+        else -> {
+            z = -1000;
+        }",// EXPECTED_REACHABLE_NODES: 1282,4f27
+fun removeAllScriptSessions(),"{
+        ApplicationManager.getApplication().assertWriteAccessAllowed()
+
+        removeAllScriptSessionsFrom(sourceCache)
+        removeAllScriptSessionsFrom(binaryCache)
+    }",// Removing script sessions is only needed temporarily until KTIJ-25620 has been implemented.,32e5
+"fun test(a: Char, b: Char)",": String {
+    var s = """"
+    for (i in a until b) {
+        s += i
+    }","// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",1436
+fun box(),": String {
+    assertEquals(""Companion"", C.Companion.result)
+    return OK.result
+}","// TARGET_BACKEND: JVM
+
+// WITH_STDLIB",4f27
+fun test(),"{
+    val buildee = build {
+        typeVariableMutableProperty = {}","// ISSUE: KT-54400
+// CHECK_TYPE_WITH_EXACT",fe98
+fun deserializeIrTypeData(proto: ProtoType),": IrType {
+        return when (proto.kindCase) {
+            DNN -> deserializeDefinitelyNotNullType(proto.dnn)
+            SIMPLE -> deserializeSimpleType(proto.simple)
+            LEGACYSIMPLE -> deserializeLegacySimpleType(proto.legacySimple)
+            DYNAMIC -> deserializeDynamicType(proto.dynamic)
+            ERROR -> deserializeErrorType(proto.error)
+            else -> error(""Unexpected IrType kind: ${proto.kindCase}",// TODO support general case of intersection type,87e1
+fun foo(x: Number),"{
+    when (x as Int) {
+        else -> checkSubtype<Int>(x)
+    }",// !CHECK_TYPE,0744
+fun make(x: String),"fun interface MakeC {
+    : C
+}","// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+
+// CHECK_BYTECODE_TEXT
+// JVM_IR_TEMPLATES
+// 0 java/lang/invoke/LambdaMetafactory
+// 1 final synthetic class ConstructorReferenceKt\$box\$1",76f6
+fun b(),"{
+        class C<S> {
+            fun f() {
+                fun g(t: T): S? = null
+            }",// WITH_SIGNATURES,4df1
+fun bar(b: A<String>),{},"// FULL_JDK
+// LANGUAGE: -JavaTypeParameterDefaultRepresentationWithDNN
+// ISSUE: KT-65184
+
+// FILE: A.java",dfb1
+fun bar(),": String
+}
+
+expect inline class Foo2(val x: Int)
+
+expect <!ABSENCE_OF_PRIMARY_CONSTRUCTOR_FOR_VALUE_CLASS, ABSENCE_OF_PRIMARY_CONSTRUCTOR_FOR_VALUE_CLASS{JVM}","// !LANGUAGE: +InlineClasses, -JvmInlineValueClasses
+// MODULE: m1-common
+// FILE: common.kt",66c3
+fun foo(),"}
+
+expect class ValueInsideTypealias {
+    @Ann
+    val value: String
+}","// WITH_STDLIB
+// MODULE: m1-common
+// FILE: common.kt",519f
+fun testValFromOtherModule(),"{
+    js(<!JSCODE_CAN_NOT_VERIFY_JAVASCRIPT!>""var ${<!JSCODE_ARGUMENT_NON_CONST_EXPRESSION!>valFromOtherModule<!>}","// FIR_DIFFERENCE
+// The difference is okay: K1 and K2 report a bit differently
+// ERROR_POLICY: SEMANTIC
+
+// MODULE: lib1
+// FILE: A.kt",e2d0
+fun clear(),"{
+        throw UnsupportedOperationException()
+    }","// SKIP_JDK6
+// TARGET_BACKEND: JVM
+// FULL_JDK
+// WITH_STDLIB",44a6
+fun main(),"{
+        HashMap<String, T>()[""""]
+    }",// KOTLIN_CONFIGURATION_FLAGS: +JVM.DISABLE_PARAM_ASSERTIONS,d987
+fun foo(),"{
+            Inner()
+        }","// FIR_IDENTICAL
+// SKIP_TXT",519f
+"fun getOptions(enabledCompilerPlugins: List<String>, compilerPluginOptions: List<String>)",": List<String>?
+
+    protected open fun getOptions(
+        mavenProject: MavenProject,
+        enabledCompilerPlugins: List<String>,
+        compilerPluginOptions: List<String>
+    ): List<String>? = g","// WITH_STDLIB
+// LINK_VIA_SIGNATURES_K1
+// DUMP_SIGNATURES
+
+// MODULE: maven
+// FILE: MavenProject.kt",e7b6
+fun test(),: Unit {},// JVM_TARGET: 11,fe98
+fun test(),"{
+    // @NotNull platform type
+    val platformNN = J.staticNN
+    // @Nullable platform type
+    val platformN = J.staticN
+    // platform type with no annotation
+    val platformJ = J.staticJ
+
+    val a: Any? = null
+
+    if (<!SENSELESS_COMPARISON!>platformNN !== null<!>) {}","// !DIAGNOSTICS: -UNUSED_EXPRESSION
+
+// FILE: J.java",fe98
+fun add(s: String),: Boolean = t,// TARGET_BACKEND: JVM,39e3
+"fun get(i: Int, j: Int, k: Int)",= v,// WITH_STDLIB,3dc1
+fun testIncrementorObjC(),"{
+    val incrementor = IncrementorViaObjC()
+    assertEquals(0, incrementor.counter.intValue)
+
+    incrementor.increment()
+    assertEquals(1, incrementor.counter.intValue)
+
+    incrementor.incrementBy(NSNumber.numberWithInt(3))
+    assertEquals(4, incrementor.counter.intValue)
+
+    incrementor.counter = NSNumber.numberWithInt(7)
+    assertEquals(7, incrementor.counter.intValue)
+
+    incrementor.incrementBy(NSNumber.numberWithInt(2))
+    assertEquals(9, incrementor.counter.intValue)
+
+    val otherIncrementor = Incrementor()
+    incrementor.incrementOtherBy(otherIncrementor, NSNumber.numberWithInt(5))
+    assertEquals(9, incrementor.counter.intValue)
+    assertEquals(5, otherIncrementor.counter.intValue)
+}","// Doing everything testIncrementorKt does, but via ObjC dynamic dispatch",8044
+fun testIncrementorObjCInNewThread(),"{
+    if (!isExperimentalMM()) // Cross-thread stuff doesn't work with the legacy MM
+        return
+
+    val incrementor = IncrementorViaObjCInNewThread()
+    assertEquals(0, incrementor.counter.intValue)
+
+    incrementor.increment()
+    assertEquals(1, incrementor.counter.intValue)
+
+    incrementor.incrementBy(NSNumber.numberWithInt(3))
+    assertEquals(4, incrementor.counter.intValue)
+
+    incrementor.counter = NSNumber.numberWithInt(7)
+    assertEquals(7, incrementor.counter.intValue)
+
+    incrementor.incrementBy(NSNumber.numberWithInt(2))
+    assertEquals(9, incrementor.counter.intValue)
+
+    val otherIncrementor = Incrementor()
+    incrementor.incrementOtherBy(otherIncrementor, NSNumber.numberWithInt(5))
+    assertEquals(9, incrementor.counter.intValue)
+    assertEquals(5, otherIncrementor.counter.intValue)
+}","// Doing everything testIncrementorKt does, but via ObjC dynamic dispatch and in a new NSThread",f24b
+fun testIncrementorMix(),"{
+    val objc = IncrementorViaObjC()
+    val kt = objc.impl
+    assertEquals(0, kt.counter.intValue)
+
+    kt.increment()
+    assertEquals(1, kt.counter.intValue)
+
+    objc.increment()
+    assertEquals(2, kt.counter.intValue)
+
+    kt.counter = NSNumber.numberWithInt(7)
+    assertEquals(7, kt.counter.intValue)
+
+    objc.increment()
+    assertEquals(8, kt.counter.intValue)
+
+    objc.counter = NSNumber.numberWithInt(11)
+    assertEquals(11, kt.counter.intValue)
+
+    kt.increment()
+    assertEquals(12, kt.counter.intValue)
+}",// Mixing Kt and ObjC accesses,ea1d
+fun testIncrementorMixInNewThread(),"{
+    if (!isExperimentalMM()) // Cross-thread stuff doesn't work with the legacy MM
+        return
+
+    val objc = IncrementorViaObjCInNewThread()
+    val kt = objc.impl
+    assertEquals(0, kt.counter.intValue)
+
+    kt.increment()
+    assertEquals(1, kt.counter.intValue)
+
+    objc.increment()
+    assertEquals(2, kt.counter.intValue)
+
+    kt.counter = NSNumber.numberWithInt(7)
+    assertEquals(7, kt.counter.intValue)
+
+    objc.increment()
+    assertEquals(8, kt.counter.intValue)
+
+    objc.counter = NSNumber.numberWithInt(11)
+    assertEquals(11, kt.counter.intValue)
+
+    kt.increment()
+    assertEquals(12, kt.counter.intValue)
+}",// Mixing Kt and ObjC accesses when ObjC happens in a different thread,3b78
+fun isStopped(),": Boolean
+}
+
+interface EventRo : Stoppable
+
+interface Event : Stoppable {
+    override : Boolean {
+        return true
+    }","// MODULE: lib
+// FILE: lib.kt",36ac
+fun isCastToAForwardDeclaration(forwardDeclarationType: KotlinType),": Boolean {
+        val forwardDeclarationClassDescriptor = forwardDeclarationType.constructor.declarationDescriptor
+        if (forwardDeclarationClassDescriptor !is ClassDescriptor) return false
+        return forwardDeclarationClassDescriptor.getForwardDeclarationKindOrNull() != null
+    }","/**
+     * Here, we only check that we are casting to a forward declaration to suppress a CAST_NEVER_SUCCEEDS warning. The cast is further
+     * checked in NativeForwardDeclarationRttiChecker.
+     */",4a51
+fun ok(),"= ""","// ISSUE: KT-52677
+// MODULE: lib
+// FILE: lib.kt",23f4
+"fun checkElementWithConeType(element: FirElement, type: ConeKotlinType)","{
+            when (checkConeType(type)) {
+                ConeTypeStatus.TypeVariableFound -> detectedTypeVariableTypesParents += element
+                ConeTypeStatus.StubFound -> detectedStubTypesParents += element
+                null -> {}",// --------------------------------------------------------------------------------------------,8e71
+fun get(),"fun interface KSupplier<T> {
+    : T
+}","// !LANGUAGE: +KotlinFunInterfaceConstructorReference
+
+// WITH_STDLIB
+// TARGET_BACKEND: JVM
+
+// DONT_TARGET_EXACT_BACKEND: JVM
+//  ^ old JVM BE generates bogus code
+
+// FILE: funInterfaceConstructorThrowsNpe.kt",7383
+"fun <From, To> copyNotNull(from: List<From>, to: List<To>)","where From : To, <expr>To</expr> : Any {
+}",// WITH_STDLIB,c854
+fun foo(),{},// FIR_IDENTICAL,519f
+fun o(),": String
+}
+
+abstract class Bar : Foo() {
+    @JsName(""oStable"")
+    abstract fun String.o(): String
+
+    override : String {
+        return ""O"".o()
+    }","// EXPECTED_REACHABLE_NODES: 1252
+// IGNORE_BACKEND: JS
+// RUN_PLAIN_BOX_FUNCTION
+// INFER_MAIN_MODULE
+
+// MODULE: lib
+// FILE: lib.kt",1549
+fun greet(),"{
+        println(""Hello, ${name}",// MAIN_ARGS: [Pavel],01d6
+fun box(),": String {
+    return Example.MESSAGE
+}","// JDK_RELEASE: 14
+
+// FILE: Example.java",4f27
+fun main(),"{
+    takeMutable(<!NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS!>J.foo()<!>)
+}","// NULLABILITY_ANNOTATIONS: @org.jetbrains.annotations:warn
+// DIAGNOSTICS: -UNUSED_PARAMETER
+
+// FILE: ReadOnly.java",d987
+fun <T> ofType(x: T),: T = x,// !DIAGNOSTICS: -UNUSED_PARAMETER,8eb2
+fun plusK1(s: String),= s,"// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+// FULL_JDK
+
+// We generate 1 clause in '$deserializeLambda' for each unique possible combination of deserialized lambda parameters
+// (that's all information stored during indy lambda serialization, anyway).
+
+// CHECK_BYTECODE_TEXT
+// JVM_IR_TEMPLATES
+// 12 java/lang/invoke/LambdaMetafactory
+// 1 (LOOKUP|TABLE)SWITCH
+// 4 java/lang/String\.equals
+
+// FILE: multipleTopLevelFunRefs.kt",1b30
+fun foo(),": T
+}
+
+interface IFoo2<out T> {
+    : T
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",519f
+fun foo(),{},"// TARGET_BACKEND: JVM
+// WITH_REFLECT",519f
+fun getBaseBoundFqNameByMutability(a: ConeKotlinType),": ClassId? {
+        val classId = a.classId ?: return null
+
+        if (classId in baseCollectionToMutableEquivalent) return classId
+
+        return mutableCollectionToBaseCollection[classId]
+    }",// We consider base bounds as not mutable collections,1d36
+fun foo(),"@JsName(""foo"")
+    fun bar()
+}
+
+interface J {
+    
+
+    fun bar()
+}",// FIR_IDENTICAL,519f
+fun not(),"= """,// EXPECTED_REACHABLE_NODES: 1284,df73
+fun box(),": String {
+    val myThread: Thread = thread(start = false) {  }",// JDK_RELEASE: 11,4f27
+fun testFor(),"{
+    val xs = IntArray(10) { i -> i }",// !LANGUAGE: +AllowBreakAndContinueInsideWhen,b009
+fun sourceFriendsDependencies(modules: Collection<FirModuleData>),"{
+            allFriendsDependencies += modules
+        }","// Potentially, a part of a public API, so we leave it even while it's unused",0d20
+fun sourceDependsOnDependencies(modules: Collection<FirModuleData>),"{
+            allDependsOnDependencies += modules
+        }","// Potentially, a part of a public API, so we leave it even while it's unused",bfaf
+fun check(),"{
+        assert(false)
+    }","// TARGET_BACKEND: JVM
+// ASSERTIONS_MODE: jvm
+// WITH_STDLIB
+// WITH_COROUTINES",c89c
+fun x(),= 1,// DO_NOT_CHECK_NON_PSI_SYMBOL_RESTORE_K1,7869
+fun memberFunction(),{},"// !LANGUAGE: +RepeatableAnnotations
+// TARGET_BACKEND: JVM_IR
+// WITH_STDLIB
+// FULL_JDK
+// JVM_TARGET: 1.8
+// FILE: box.kt",299f
+fun b_fun(),{},"// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE",0c55
+fun box(),": String {
+    val prop = ::state
+
+    assertEquals("""", prop.getter.invoke())
+    assertEquals("""", prop.getter())
+
+    prop.setter(""OK"")
+
+    return prop.get()
+}","// TARGET_BACKEND: JVM
+
+// WITH_REFLECT",4f27
+fun foo(),= A,// FIR_IDENTICAL,519f
+"fun main(b: B, c: C)","{
+    b.foo()<!UNSAFE_CALL!>.<!>length
+    b.foo()?.length
+    b.foo2()<!UNSAFE_CALL!>.<!>length
+    b.foo2()?.length
+    b.foo3()<!UNSAFE_CALL!>.<!>length
+    b.foo3()?.length
+    <!RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS!>b.foo4()<!>.length
+    b.foo4()?.length
+
+    b.bar(<!NULL_FOR_NONNULL_TYPE!>null<!>)
+    b.bar("""")
+    b.bar2(<!NULL_FOR_NONNULL_TYPE!>null<!>)
+    b.bar2("""")
+    b.bar3(<!NULL_FOR_NONNULL_TYPE!>null<!>)
+    b.bar3("""")
+    b.bar4(<!NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS!>null<!>)
+    b.bar4("""")
+
+    c.foo4()<!UNSAFE_CALL!>.<!>length
+    c.foo4()?.length
+    c.bar4(<!NULL_FOR_NONNULL_TYPE!>null<!>)
+    c.bar4("""")
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_PARAMETER
+// JSR305_GLOBAL_REPORT: warn
+// JSR305_MIGRATION_REPORT: strict
+
+// FILE: A.java",f1fa
+fun box(),": String {
+    testR0xE0()
+    testR0xE1()
+    testR0xE2()
+    testR0xE3()
+    testR0xE4()
+    testR0xE5()
+    testR1xE0()
+    testR1xE1()
+    testR1xE2()
+    testR1xE3()
+    testR1xE4()
+    testR1xE5()
+    return ""OK""
+}","// Auto-generated by GenerateInRangeExpressionTestData. Do not edit!
+// WITH_STDLIB",4f27
+"fun takeJ(map: Map<Any, Any>)",{},"// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER",15b0
+fun test1(),"{
+    var c = C()
+    val x = c.x
+    if (x == null) return
+    x.length // smartcast
+    c.x<!UNSAFE_CALL!>.<!>length // no smartcast
+    c = C()
+    x.length // smartcast
+    c.x<!UNSAFE_CALL!>.<!>length // no smartcast
+}",// SKIP_TXT,fa3b
+fun box(),": String {
+    val impl = ListImpl()
+    if (impl.size != 56) return ""fail 1""
+    if (!impl.contains(""abc"")) return ""fail 2""
+
+    val l: List<String> = impl
+
+    if (l.size != 56) return ""fail 3""
+    if (!l.contains(""abc"")) return ""fail 4""
+
+    val anyList: List<Any?> = impl as List<Any?>
+
+    if (anyList.size != 56) return ""fail 5""
+    if (!anyList.contains(""abc"")) return ""fail 6""
+
+    if (anyList.contains(1)) return ""fail 7""
+    if (anyList.contains(null)) return ""fail 8""
+
+    return ""OK""
+}","// TARGET_BACKEND: JVM
+
+// FILE: J.java",4f27
+fun foo(x: String),: I = o,"// EXPECTED_REACHABLE_NODES: 1290
+// FILE: a.kt",f5be
+fun foo(),{},"// ISSUE: KT-65105
+
+// FILE: kotlin.kt",519f
+fun _assert(condition: Boolean),"{
+    if (!condition) throw AssertionError(""Fail"")
+}","// TARGET_BACKEND: JVM
+
+// This test checks that our bytecode is consistent with javac bytecode",6a4a
+fun foo(n: Number),"{
+    if (n.toInt() > 1 && when (n) {
+            is Float -> true
+            else -> false
+        }",// FILE: test.kt,2265
+fun dad(),"{
+
+                val a = <expr>foo.www.ddd.Check.BBD.Bwd::class.java.annotatedInterfaces.size</expr>
+            }",// FILE: main.kt,ca2d
+fun getMain(className: String),": java.lang.reflect.Method {
+    val classLoader = A().javaClass.classLoader
+    return classLoader.loadClass(className).getDeclaredMethod(""main"", Array<String>::class.java)
+}","// TARGET_BACKEND: JVM
+
+// WITH_STDLIB
+// FILE: 1.kt",2b0b
+fun main(args: Array<String>),"{
+    args[0] += ""K""
+}",// FILE: b.kt,5b61
+fun box(),": String {
+    val outer = Outer.Inner
+    val other = Outer.Other
+    val another = Outer.Another
+    return ""OK""
+}",// See also KT-6299,4f27
+fun log(message: String),"{
+    global += message
+}","// KJS_WITH_FULL_RUNTIME
+// EXPECTED_REACHABLE_NODES: 1525",fafb
+fun foo(),= h,"// TARGET_BACKEND: JVM
+// MODULE: lib
+// WITH_STDLIB
+// FILE: A.kt",519f
+fun test(),= x,"// FIR_IDENTICAL
+// FILE: a/x.java",fe98
+fun box(),": String {
+    val l = ArrayList<Int>()
+    l.add(1)
+    var x = l[0]
+    x = 2
+    if (x != 2) return ""Fail: $x}",// KJS_WITH_FULL_RUNTIME,4f27
+fun foo(),= z,"// WITH_STDLIB
+// MODULE: lib
+// FILE: lib.kt",519f
+fun suspendThere(v: String),: String = s,"// WITH_STDLIB
+// WITH_COROUTINES",4d2d
+fun test(),"{
+    throw <!NO_COMPANION_OBJECT, TYPE_MISMATCH!>Exn<!>
+}",// +JDK,fe98
+"fun <T, V> bar()",= B,"// WITH_STDLIB
+
+// FILE: test.kt",b0fa
+fun test(p: T),": Int
+}
+
+inline fun <T> Array<T>.copyOfRange1(crossinline toIndex: () -> Int) =
+        o","// WITH_REFLECT
+// NO_CHECK_LAMBDA_INLINING
+// TARGET_BACKEND: JVM
+// IGNORE_INLINER: IR
+
+// FILE: 1.kt",bfc4
+fun test(),": Unit {
+        System.out?.println(hello)
+    }","// TARGET_BACKEND: JVM
+// TARGET_BACKEND: JVM_IR",fe98
+fun test(),"{
+                val x = bar
+                val o = object : Wrapper(z) {
+                    fun local() {
+                        val y = foo()
+                    }",// FILE: Base.java,fe98
+fun foo(vararg t : String),"= ""","// FIR_IDENTICAL
+// RENDER_DIAGNOSTICS_FULL_TEXT",39b1
+"fun f1(value: Pair<String, String>)",": Boolean {
+    val (`false`, `true`) = value
+
+    if (`false` != ""1"") return false
+    if (`true` != ""2"") return false
+
+    return true
+}",// WITH_STDLIB,eaa4
+fun foo(),"val bar: Int
+}
+
+object Impl : IBase {
+    override  {}",// !DIAGNOSTICS: -UNUSED_PARAMETER,519f
+fun ok(),": String = ""","// !JVM_DEFAULT_MODE: all
+// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// JVM_TARGET: 1.8
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",23f4
+fun <T> id(t: T),: T = t,"// FIR_IDENTICAL
+// !CHECK_TYPE",3662
+fun use(token: String),"{
+    result = token
+}","// WITH_COROUTINES
+// WITH_STDLIB
+
+// FILE: test.kt",538e
+fun createLambda(),": () -> KotlinObject {
+    val lambdaResult = KotlinObject()
+    return { lambdaResult }",// Just to make IntArray available from Swift.,a59d
+fun createLambda(kotlinLivenessTracker: KotlinLivenessTracker),": () -> KotlinObject {
+    val lambdaResult = KotlinObject()
+    return {
+        val result = lambdaResult // make it capturing thus dynamic.
+        kotlinLivenessTracker.add(result)
+        result
+    }",// make it capturing thus dynamic.,6a8e
+fun test(),{},"// !LANGUAGE: -ProhibitProtectedCallFromInline
+// !DIAGNOSTICS: -EXPOSED_PARAMETER_TYPE -NOTHING_TO_INLINE
+
+// FILE: JavaClass.java",fe98
+fun doJob(),": Result
+}
+
+class Inheritor(context: Context) : BaseClass(context, 5, true) {
+    override  = Result.SUCCESS
+}","// STRIP_METADATA
+// TODO: Re-enable metadata generation",2c35
+fun ok(),"= ""","// NO_COMMON_FILES
+// MODULE: lib
+// FILE: lib.kt",23f4
+fun method(a: A),"fun interface B {
+    : String
+}","// KT-44622
+// MODULE: lib
+// FILE: A.kt",e17a
+fun box(),: String = b,"// MODULE: main(lib)
+// FILE: B.kt",4f27
+fun phaseSpecificCheckIsResolved(target: FirElementWithResolveState),"private fun checkNestedDeclarationsAreResolved(target: FirElementWithResolveState) {
+        if (target !is FirDeclaration) return
+
+        checkFunctionParametersAreResolved(target)
+        checkVariableSubDeclarationsAreResolved(target)
+        checkTypeParametersAreResolved(target)
+    }","/**
+     * Check that phase-specific conditions are met
+     * Will be performed to resolved declaration and its nested declarations
+     * @see checkNestedDeclarationsAreResolved
+     */",4394
+fun box(),"{
+    foo(""abc"")
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER",4f27
+fun execute(),": T
+}
+
+class SomeImplementation : SomeClass<String>() {
+    override : String = ""Test""
+}","// !LANGUAGE: +PartiallySpecifiedTypeArguments
+// WITH_STDLIB
+// TARGET_BACKEND: JVM",1f3c
+"fun <T, R> foo(x: T)",: R = T,"// DONT_TARGET_EXACT_BACKEND: JVM
+// DONT_TARGET_EXACT_BACKEND: JVM_IR
+
+// WITH_STDLIB
+// WITH_REFLECT",ecdc
+"fun enterFile(file: FirFile, buildGraph: Boolean)","{
+        graphBuilder.enterFile(file, buildGraph)?.mergeIncomingFlow()
+    }",// ----------------------------------- Files ------------------------------------------,0ea5
+"fun enterScript(script: FirScript, buildGraph: Boolean)","{
+        graphBuilder.enterScript(script, buildGraph)?.mergeIncomingFlow()
+    }",// ----------------------------------- Scripts ------------------------------------------,34f8
+fun enterCodeFragment(codeFragment: FirCodeFragment),"{
+        graphBuilder.enterCodeFragment(codeFragment).mergeIncomingFlow { _, flow ->
+            val smartCasts = codeFragment.codeFragmentContext?.smartCasts.orEmpty()
+            for ((originalRealVariable, exactTypes) in smartCasts) {
+                val realVariable = variableStorage.getOrPut(originalRealVariable.identifier) { originalRealVariable }",// ----------------------------------- Code Fragment ------------------------------------------,e5bb
+fun enterValueParameter(valueParameter: FirValueParameter),"{
+        val (outerNode, innerNode) = graphBuilder.enterValueParameter(valueParameter) ?: return
+        outerNode.mergeIncomingFlow()
+        innerNode.mergeIncomingFlow()
+    }",// ----------------------------------- Value parameters (and it's defaults) -----------------------------------,f4b8
+fun enterProperty(property: FirProperty),"{
+        graphBuilder.enterProperty(property)?.mergeIncomingFlow()
+    }",// ----------------------------------- Property -----------------------------------,40dd
+fun enterField(field: FirField),"{
+        graphBuilder.enterField(field)?.mergeIncomingFlow()
+    }",// ----------------------------------- Field -----------------------------------,7434
+fun enterDelegateExpression(),"{
+        graphBuilder.enterDelegateExpression()
+    }",// ----------------------------------- Delegate -----------------------------------,e4a4
+fun enterBlock(block: FirBlock),"{
+        graphBuilder.enterBlock(block).mergeIncomingFlow()
+    }",// ----------------------------------- Block -----------------------------------,e126
+fun exitTypeOperatorCall(typeOperatorCall: FirTypeOperatorCall),"{
+        graphBuilder.exitTypeOperatorCall(typeOperatorCall).mergeIncomingFlow { _, flow ->
+            if (typeOperatorCall.operation !in FirOperation.TYPES) return@mergeIncomingFlow
+            addTypeOperatorStatements(flow, typeOperatorCall)
+        }",// ----------------------------------- Operator call -----------------------------------,6558
+fun hasOverriddenEquals(type: ConeKotlinType),": Boolean {
+        val session = components.session
+        val symbolsForType = collectSymbolsForType(type, session)
+        if (symbolsForType.any { it.hasEqualsOverride(session, checkModality = true) }",// Only consider the LHS variable if it has not been reassigned in the RHS.,9680
+fun enterCheckNotNullCall(),"{
+        graphBuilder.enterCall()
+    }",// ----------------------------------- Check not null call -----------------------------------,b3c2
+fun enterWhileLoop(loop: FirLoop),"{
+        val (loopEnterNode, loopConditionEnterNode) = graphBuilder.enterWhileLoop(loop)
+        loopEnterNode.mergeIncomingFlow()
+        loopConditionEnterNode.mergeIncomingFlow { _, flow -> enterRepeatableStatement(flow, loop) }",// ----------------------------------- While Loop -----------------------------------,8bc4
+fun enterDoWhileLoop(loop: FirLoop),"{
+        val (loopEnterNode, loopBlockEnterNode) = graphBuilder.enterDoWhileLoop(loop)
+        loopEnterNode.mergeIncomingFlow { _, flow -> enterRepeatableStatement(flow, loop) }",// ----------------------------------- Do while Loop -----------------------------------,a712
+fun exitQualifiedAccessExpression(qualifiedAccessExpression: FirQualifiedAccessExpression),"{
+        graphBuilder.exitQualifiedAccessExpression(qualifiedAccessExpression).mergeIncomingFlow { _, flow ->
+            processConditionalContract(flow, qualifiedAccessExpression, callArgsExit = null)
+        }",// ----------------------------------- Resolvable call -----------------------------------,52ff
+fun enterBinaryLogicExpression(binaryLogicExpression: FirBinaryLogicExpression),"{
+        graphBuilder.enterBinaryLogicExpression(binaryLogicExpression).mergeIncomingFlow()
+    }",// ----------------------------------- Boolean operators -----------------------------------,bee0
+fun enterInitBlock(initBlock: FirAnonymousInitializer),"{
+        graphBuilder.enterInitBlock(initBlock).mergeIncomingFlow()
+    }",// ----------------------------------- Init block -----------------------------------,8f55
+fun enterContractDescription(),"{
+        graphBuilder.enterFakeExpression().mergeIncomingFlow()
+    }",// ----------------------------------- Contract description -----------------------------------,9629
+fun enterElvis(elvisExpression: FirElvisExpression),"{
+        graphBuilder.enterElvis(elvisExpression)
+    }",// ----------------------------------- Elvis -----------------------------------,5263
+fun exitCallableReference(callableReferenceAccess: FirCallableReferenceAccess),"{
+        graphBuilder.exitCallableReference(callableReferenceAccess).mergeIncomingFlow()
+    }",// If (x ?: null) != null then x != null,d0e3
+fun foo(),{},// IGNORE_BACKEND: JS,519f
+fun test(a: Int),"{
+    var <!ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE!>aa<!> = a
+    <!UNUSED_VALUE!>aa =<!> 324 //should be an 'unused value' warning here
+}","//KT-609 Analyze not only local variables, but function parameters as well in 'unused values' analysis",688e
+fun foo(s : String),{},//should be an 'unused variable' warning,8285
+fun foo(s : String),{},//should not be a warning,8285
+fun test(tr: Tr<String>),"{
+    val v = tr as G?
+    // If v is not nullable, there will be a warning on this line:
+    checkSubtype<G<String>>(v!!)
+}","// FIR_IDENTICAL
+// !CHECK_TYPE",5d4d
+fun foo(),= B,// LOOK_UP_FOR_ELEMENT_OF_TYPE: org.jetbrains.kotlin.psi.KtSimpleNameExpression,519f
+fun overriddenFunction(),= U,// FIR_IDENTICAL,6d2c
+fun <T> id(t: T),= t,"// FIR_IDENTICAL
+// !CHECK_TYPE",3662
+fun box(),": String {
+    // Before changes in raw types computation: (OCNewFileActionBase<OCNewFileActionBase<*>.CreateFileDialogBase!>..OCNewFileActionBase<out OCNewFileActionBase<*>.CreateFileDialogBase!>?)
+    // After that: raw (OCNewFileActionBase<*>..OCNewFileActionBase<*>?)
+    val x = OCNewFileActionBase.get()
+    return ""OK""
+}","// TARGET_BACKEND: JVM
+
+// FILE: OCNewFileActionBase.java",4f27
+fun fooB(x: Int),": String
+}
+
+class Foo
+
+fun test(ab: A) {
+    if (ab is B) {
+        var z = id(ab) // materialize smartcast
+        z = <!ASSIGNMENT_TYPE_MISMATCH!>Foo()<!> // unsafe assignment
+        z.fooB(1)
+    }","// ISSUE: KT-53752
+// INFERENCE_HELPERS",673b
+fun usage(),"{
+
+}",// FILE: main.kt,455a
+fun testLazyNullString(),"{
+    try {
+        val s: String = lazyNullString
+        throw Exception(""'val s: String = lazyNullString' should throw NullPointerException"")
+    }","// TARGET_BACKEND: JVM
+// IGNORE_BACKEND: JVM
+// WITH_STDLIB
+// FILE: kt24258.kt",6698
+fun defaultFun(),"{
+        println(""default"")
+    }",// COMPILER_ARGUMENTS: -Xjvm-default=all-compatibility,031b
+fun foo(t: T),": T
+}
+
+class C : Base<Unit> {
+    override fun foo(t: Unit) {}",// C,6c6b
+fun box(),= e,// FUNCTION: kotlin.require,4f27
+fun test(x: Any),": String {
+    return when (x) {
+        is A -> x.toString()
+        is B -> x.toString()
+        else -> ""fail""
+    }","// TARGET_BACKEND: JVM_IR
+// FILE: A.java",44e2
+fun test(),"{
+    val sample1: List<List<Int?>> = arrayList(arrayList<Int?>(1, 7, null, 8))
+
+    //breaks compiler
+    val sample2 = sample1.map({it.map({it}","// !CHECK_TYPE
+
+//KT-2179 Nested function literal breaks compiler",fe98
+fun box(),": String {
+    return Foo(""OK"").value
+}","// LANGUAGE: +MultiPlatformProjects
+// TARGET_BACKEND: JVM
+// WITH_STDLIB
+
+// MODULE: common
+// FILE: common.kt",4f27
+"fun put(key: K, value: V)",: V? = n,"// WITH_STDLIB
+// FULL_JDK
+// JVM_TARGET: 1.8
+// TARGET_BACKEND: JVM_IR
+
+// SEPARATE_SIGNATURE_DUMP_FOR_K2
+// ^ Value parameters in fake overrides generated by K1 and K2 are different",6012
+fun some(),{},"// FIR_IDENTICAL
+// ISSUE: KT-57100
+// WITH_STDLIB",6092
+fun schedule(),"{
+        this.currentTcb = this.list
+        while (this.currentTcb != null) {
+            if (this.currentTcb!!.isHeldOrSuspended()) {
+                this.currentTcb = this.currentTcb!!.link
+            }","/**
+     * Execute the tasks managed by this scheduler.
+     */",e9c2
+fun suspendCurrent(),": TaskControlBlock? {
+        this.currentTcb!!.markAsSuspended()
+        return this.currentTcb
+    }","/**
+     * Suspend the currently executing task and return the next task control block
+     * to run.  If new work is added to the suspended task it will be made runnable.
+     */",3167
+fun queue(packet: Packet),": TaskControlBlock? {
+        val t = this.blocks[packet.id]
+        if (t == null) return t
+        this.queueCount++
+        packet.link = null
+        packet.id = this.currentId
+        return t.checkPriorityAdd(this.currentTcb!!, packet)
+    }","/**
+     * Add the specified packet to the end of the work list used by the task
+     * associated with the packet and make the task runnable if it is currently
+     * suspended.
+     * @param {Packet} packet the packet to add
+     */",01af
+fun run(),": TaskControlBlock? {
+        val packet: Packet?
+        if (this.state == STATE_SUSPENDED_RUNNABLE) {
+            packet = this.queue
+            this.queue = packet?.link
+            if (this.queue == null) {
+                this.state = STATE_RUNNING
+            }","/**
+     * Runs this task, if it is ready to be run, and returns the next task to run.
+     */",354f
+fun test(p: T),": T {
+        return p
+    }","// !JVM_DEFAULT_MODE: all-compatibility
+// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// WITH_STDLIB",bfc4
+fun test(),"{
+    fun bar() {
+        val bas = fun() {
+            <!RETURN_NOT_ALLOWED!>return@bar<!>
+        }","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE",fe98
+fun cloneable(c: Cloneable),= J,// FILE: J.java,4682
+fun foo1(),{},"// FIR_IDENTICAL
+// ISSUE: KT-48870",d289
+fun box(),": String {
+    val min = 0U.toString()
+    if (""0"" != min) throw AssertionError(min)
+
+    val middle = 2_147_483_647U.toString()
+    if (""2147483647"" != middle) throw AssertionError(middle)
+
+    val max = 4_294_967_295U.toString()
+    if (""4294967295"" != max) throw AssertionError(max)
+
+    return ""OK""
+}","// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// JVM_TARGET: 1.8",4f27
+fun ok(),"= ""","// TARGET_BACKEND: JVM
+
+// FILE: unresolvedJavaClassInDifferentFile.kt",23f4
+"fun add(index: Int, element: E)","{
+        TODO()
+    }","// WITH_STDLIB
+// JVM_ABI_K1_K2_DIFF: KT-63984",cdbf
+fun nullableF(),: (() -> Unit)?= n,"// FIR_IDENTICAL
+// SKIP_TXT",6ecc
+fun box(),": String {
+    val baos = ByteArrayOutputStream()
+    val oos = ObjectOutputStream(baos)
+    oos.writeObject(Foo(""abacaba"")::value)
+    oos.close()
+
+    val bais = ByteArrayInputStream(baos.toByteArray())
+    val ois = ObjectInputStream(bais)
+    assertEquals(Foo(""abacaba"")::value, ois.readObject())
+    ois.close()
+
+    return ""OK""
+}","// TARGET_BACKEND: JVM
+// WITH_REFLECT",4f27
+fun box(),": String {
+    return TestClass().prop
+}","// !JVM_DEFAULT_MODE: all-compatibility
+// JVM_TARGET: 1.8
+// WITH_STDLIB
+// MODULE: lib
+// FILE: 1.kt",4f27
+fun box(),": String {
+    if (null !== null) return ""null !== null""
+    if (!(""ab"" === ""ab"")) return ""ab !== ab""
+    if (""ab"" === ""a"") return ""ab === a""
+
+    if (""0"" as Any === 0) return ""'0' === 0""
+    if (!(0 === 0)) return ""0 !== 0""
+    if (0 === 1) return ""0 === 1""
+
+
+    return ""OK"";
+}",// EXPECTED_REACHABLE_NODES: 1280,4f27
+fun foo1(x: Int),"{
+    val x = if (true) { // OI: Map<String, () → Int>?, NI: Nothing?, error
+        """" to { x }",// !DIAGNOSTICS: -NAME_SHADOWING -UNUSED_VARIABLE -UNUSED_EXPRESSION,f1b3
+fun test(),"{
+    f()
+}",// FIR_IDENTICAL,fe98
+fun box(),": String {
+    assertNull(Bar::class.findAnnotation<Yes>())
+    assertNull(Bar::class.findAnnotation<No>())
+
+    assertEquals(""OK"", Foo::class.findAnnotations<Yes>().single().value)
+
+    return Foo::class.findAnnotation<Yes>()?.value ?: ""Fail: no annotation""
+}","// TARGET_BACKEND: JVM
+// WITH_REFLECT",4f27
+fun f(),": String = ""","// MODULE: lib
+// FILE: Class.kt",f6fb
+fun getOrThrow(),: T? = a,"// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",791b
+fun getO(),"= ""","// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// WITH_STDLIB
+
+// FILE: javaDefaultMethod.kt",273a
+fun ok(),"= ""","// SKIP_INLINE_CHECK_IN: inlineFun$default
+// FILE: 1.kt",23f4
+fun getR(),": String = ""","// TARGET_BACKEND: JVM
+// WITH_STDLIB",8ade
+fun test(),"{
+    var i = 0
+    var j = 0
+
+    loop@ for (k in 1..10) {
+        loop@ for (m in 1..10) {
+            if (m == 4) break@loop
+            j = m
+        }",// EXPECTED_REACHABLE_NODES: 1283,fe98
+fun f0(),{},"// WITH_REFLECT
+// TARGET_BACKEND: JVM",72ae
+fun test(),"{
+    var sum = 0
+    for (i in arrayOf("""", """", """", """").indices) {
+        sum += i
+    }","// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",fe98
+fun test(),"{
+    throw J.staticNN
+}","// FIR_IDENTICAL
+// FILE: J.java",fe98
+fun main(a: A),"{
+    a.foo("""", null)<!UNNECESSARY_SAFE_CALL!>?.<!>length
+    a.foo("""", null).length
+    a.foo(<!NULL_FOR_NONNULL_TYPE!>null<!>, """").length
+
+    a.bar("""", """")?.length
+    a.bar("""", """").length
+    a.bar(null, <!NULL_FOR_NONNULL_TYPE!>null<!>).length
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_PARAMETER
+// JSR305_GLOBAL_REPORT: strict
+
+// FILE: spr/Nullable.java",c1f5
+fun one(),= 1,"// TARGET_BACKEND: JVM_IR
+
+// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",f1e7
+fun foo(),"}
+
+expect enum class ENUM01
+
+expect annotation class ANNO01
+
+// MODULE: m2-jvm()()(m1-common)
+// FILE: jvm.kt
+
+object ActualObject {
+     {}","// MODULE: m1-common
+// FILE: common.kt",519f
+fun box(),: String = f,// FILE: 2.kt,4f27
+fun box(),": String {
+    return object : Test2 {}","// !JVM_DEFAULT_MODE: all-compatibility
+// JVM_TARGET: 1.8
+// WITH_STDLIB
+// MODULE: lib
+// FILE: 1.kt",4f27
+fun attributes(),": Map<String, String> = H","// FIR_IDENTICAL
+// KT-287 Infer constructor type arguments",bff5
+fun test(),"{
+    val x = ClassWithExternalAnnotatedMembers()
+    x.externalNotNullField<!UNNECESSARY_SAFE_CALL!>?.<!>foo()
+    x.explicitNotNullField<!UNNECESSARY_SAFE_CALL!>?.<!>foo()
+
+    ClassWithExternalAnnotatedMembers.staticExternalNotNullField<!UNNECESSARY_SAFE_CALL!>?.<!>foo()
+    ClassWithExternalAnnotatedMembers.staticExplicitNotNullField<!UNNECESSARY_SAFE_CALL!>?.<!>foo()
+}","// FIR_IDENTICAL
+// FILE: ClassWithExternalAnnotatedMembers.java",fe98
+fun box(),": String {
+    val a: dynamic = js(""{ \""--invalid--property@\"": 42 }","// IGNORE_BACKEND: JS
+// !LANGUAGE: +JsAllowInvalidCharsIdentifiersEscaping",4f27
+fun invoke(j: J),": String {
+    // Check that there's something sensible in the EnclosingMethod; crashes if it's not the case.
+    j.javaClass.enclosingMethod
+
+    return j()
+}","// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// FILE: test.kt",fc4c
+fun test(condition: Boolean),"{
+    val list1 =
+        if (condition) mutableListOf<Int>()
+        else emptyList()
+
+    list1
+
+    val list2 =
+        if (condition) mutableListOf()
+        else emptyList<Int>()
+
+    list2
+}",// !DIAGNOSTICS: -UNUSED_EXPRESSION,46fc
+fun box(),": String {
+    for ((i, v) in listOf(4, 5, 6, 7).indices.withIndex()) {
+    }","// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",4f27
+fun main(),"{
+    fun foo(m: Map<String, (Array<Int>) -> Unit>) {}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER -UNUSED_ANONYMOUS_PARAMETER",d987
+fun b(),{},"// !DIAGNOSTICS: -INVISIBLE_MEMBER -INVISIBLE_REFERENCE
+
+// FILE: b.kt",4df1
+fun c(),{},// FILE: c.kt,baea
+fun d(),{},// FILE: d.kt,7213
+fun e(),{},// FILE: e.kt,6566
+fun bar(),": B<Int>
+}
+
+interface B<T>
+fun <E> foo(block: B<E>.() -> Unit): B<E> = T","// FIR_IDENTICAL
+// ISSUE: KT-64222",66c3
+fun test_1(),"{
+    while (true) {
+
+    }","// LANGUAGE: +ProhibitSimplificationOfNonTrivialConstBooleanExpressions
+// DIAGNOSTICS: -UNUSED_VARIABLE",dda0
+fun NestedInA(),<!> {},"// FIR_IDENTICAL
+// ISSUE: KT-62005",8be6
+fun foo(),": Any
+    val x: Any
+}
+
+interface B : A {
+    override : Any
+    override val x: Any
+}","// SCOPE_DUMP: C:foo;x, Explicit:foo;x, Implicit:foo;x",519f
+fun foo(function: MySuspendFunction),{},"// ISSUE: KT-50997
+// JVM_ABI_K1_K2_DIFF: KT-63877",de3d
+fun component1(),= 1,//KT-2643 Support multi-declarations in Data-Flow analysis,fd7c
+fun box(),": String {
+    if (A.a != 2) return ""FAIL1""
+    val instance = A<Int>()
+    return if (instance.a != 1) ""FAIL2"" else ""OK""
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",4f27
+fun explicitType(),: String? = n,// MEMBER_NAME_FILTER: resolveMe,12bc
+fun f(e: E),= w,"// TARGET_BACKEND: JVM
+// FILE: E.java",b992
+fun reversed(),": SortedSet<Int> {
+        return null!!
+    }","// SKIP_KT_DUMP
+// TARGET_BACKEND: JVM
+// JDK_KIND: FULL_JDK_21
+// WITH_STDLIB
+
+// FILE: 1.kt",a30f
+fun box(),": String {
+    testR0xE0()
+    testR0xE1()
+    testR0xE2()
+    testR0xE3()
+    testR0xE4()
+    testR1xE0()
+    testR1xE1()
+    testR1xE2()
+    testR1xE3()
+    testR1xE4()
+    return ""OK""
+}","// Auto-generated by GenerateInRangeExpressionTestData. Do not edit!
+// WITH_STDLIB",4f27
+fun test(),": Foo<String> {
+    return <!DEBUG_INFO_EXPRESSION_TYPE(""Foo<kotlin.String>"")!>Foo.create()<!>
+}","// FIR_IDENTICAL
+// JSPECIFY_STATE: strict
+// !LANGUAGE: +TypeEnhancementImprovementsInStrictMode
+// MUTE_FOR_PSI_CLASS_FILES_READING
+
+// FILE: Foo.java",fe98
+fun foo(),= 4,"// FIR_IDENTICAL
+// !LANGUAGE: +ProhibitVisibilityOfNestedClassifiersFromSupertypesOfCompanion
+// See KT-21515 for a class diagram and details
+
+// class is to prevent accidental short-name import",519f
+fun box(),": String {
+    return C().<!INVISIBLE_MEMBER!>a<!>
+}",// FILE: B.java,4f27
+fun result(),"= ""","// !JVM_DEFAULT_MODE: all-compatibility
+// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// WITH_STDLIB",5880
+fun addImport(import: String),"{
+        addImportsFromString(import)
+    }",// Increment the modification stamp,c5b8
+fun appendImports(rawImports: String),": Boolean {
+        if (rawImports.isEmpty()) {
+            return false
+        }","/**
+     * Parses raw [rawImports] and appends them to the list of code fragment imports.
+     *
+     * Import strings must be separated by the [IMPORT_SEPARATOR].
+     * Each import must be either a qualified name to import (e.g., 'foo.bar'), or a complete text representation of an import directive
+     * (e.g., 'import foo.bar as baz').
+     *
+     * Note that already present import directives will be ignored.
+     *
+     * @return `true` if new import directives were added.
+     */",aca9
+fun foo(),{},"// FIR_IDENTICAL
+// MODULE: m1-common
+// FILE: common.kt",519f
+fun ff(l: Any),= l,// FIR_IDENTICAL,cd92
+fun test(),"{
+    val outerBuildee = <!NEW_INFERENCE_NO_INFORMATION_FOR_PARAMETER!>build<!> outerBuild@ {
+        val middleBuildee = <!NEW_INFERENCE_NO_INFORMATION_FOR_PARAMETER!>build<!> middleBuild@ {
+            val innerBuildee = build innerBuild@ {
+                this@outerBuild.setTypeVariable(TargetType())
+                this@middleBuild.setTypeVariable(TargetType())
+                this@innerBuild.setTypeVariable(TargetType())
+            }","// ISSUE: KT-49160
+// CHECK_TYPE_WITH_EXACT",fe98
+fun setTypeVariable(value: TV),{ storage = value },"// exact type equality check — turns unexpected compile-time behavior into red code
+            // considered to be non-user-reproducible code for the purposes of these tests",7aec
+fun foo(),"}
+expect open class BaseAImpl() : BaseA
+
+<!ABSTRACT_CLASS_MEMBER_NOT_IMPLEMENTED!>class DerivedA1<!> : BaseAImpl()
+class DerivedA2 : BaseAImpl() {
+    override  = super.<!ABSTRACT_SUPER_CALL!>foo<!>()
+}","// MODULE: m1-common
+// FILE: common.kt",519f
+fun box(),": String {
+    val vector = java.util.Vector<Int>()
+    vector.add(1)
+    vector.add(2)
+    vector.add(3)
+
+    var sum = 0
+    for(e in vector.elements()) {
+        sum += e
+    }","// TARGET_BACKEND: JVM
+
+// WITH_STDLIB
+// FULL_JDK",4f27
+fun x(),"fun interface I {
+        
+    }","// MODULE: m1
+// FILE: J.java",7869
+fun foo(s: String),= I,"// TARGET_BACKEND: JVM
+// !LANGUAGE: +InlineClasses
+// MODULE: lib
+// USE_OLD_INLINE_CLASSES_MANGLING_SCHEME
+// FILE: 1.kt",b751
+fun useR(r: R),"{
+    if (r.x as String != ""OK"") throw AssertionError(""$r"")
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",064d
+fun intfMethod(),{},"// MODULE: lib
+// FILE: lib.kt",3ae3
+fun foo(),"{
+    if (1==1) {
+        1.javaClass
+    }","// TARGET_BACKEND: JVM
+
+// WITH_STDLIB",519f
+fun checkTrue(),= S,"// TARGET_BACKEND: JVM
+// ASSERTIONS_MODE: jvm
+// WITH_STDLIB",6a1b
+fun foo(),{},// ISSUE: KT-58754,519f
+fun box(),= e,// FUNCTION: kotlin.test.assertEquals,4f27
+fun test(),"{
+    val b: Int
+    run { b = 1 }","// ISSUE: KT-41198, KT-59860",fe98
+fun box(),": String {
+    class MyClass {
+        fun ok(): String {
+            class InternalClass {
+                fun getOk(): String = ""OK""
+            }","// CHECK_FUNCTION_EXISTS: box$MyClass TARGET_BACKENDS=JS_IR
+// CHECK_FUNCTION_EXISTS: box$MyClass$ok$InternalClass TARGET_BACKENDS=JS_IR",4f27
+fun box(),": String {
+    val first = Derived().a
+    if (first != ""OK"") return first
+    val d = Derived()
+    if (d::a.get() != ""OK"") return d::a.get()
+    d.a = ""12""
+    if (d.a != ""12"") return ""Error writing: ${d.a}","// TARGET_BACKEND: JVM_IR
+// Field VS property: case 2.1
+// See KT-54393 for details
+
+// FILE: BaseJava.java",4f27
+fun foo(),"}
+
+class OverrideMethod : AbstractClass() {
+    override fun f<caret>oo() {
+    }","// PSI: org.jetbrains.kotlin.light.classes.symbol.methods.SymbolLightSimpleMethod
+// EXPECTED: java.lang.Override",519f
+"fun foo(x: T, y: T)",{},// !DIAGNOSTICS: -UNUSED_PARAMETER,8cc7
+fun box(),": String {
+    val x = MyValue(""A"", ""B"", ""C"")
+    val result = x.defaultValue + x.privateValue + x.publicValue;
+    return if (result == ""ABC"") ""OK"" else ""Error: $x""
+}","// ISSUE: KT-51092
+// FILE: MyValue.java",4f27
+fun box(),": String {
+    assertEquals(""x"", ::x.name)
+    assertEquals(""y"", ::y.name)
+    assertEquals(""MAGIC_NUMBER"", ::MAGIC_NUMBER.name)
+
+    assertEquals(1, ::x.call())
+    assertEquals(1, ::x.getter.call())
+
+    assertEquals(239, ::y.call())
+    assertEquals(239, ::y.getter.call())
+
+    assertEquals(42, ::MAGIC_NUMBER.call())
+    assertEquals(42, ::MAGIC_NUMBER.getter.call())
+
+    assertEquals(Unit, ::x.setter.call(2))
+    assertEquals(2, ::x.call())
+    assertEquals(2, ::x.getter.call())
+
+    return ""OK""
+}","// TARGET_BACKEND: JVM
+
+// KT-11447 Multifile declaration causes IAE: Method can not access a member of class
+// WITH_REFLECT
+// FILE: Test1.kt",4f27
+fun test(),"{
+    A.<!DEBUG_INFO_CALL(""fqName: A.Companion.entries; typeCall: variable""), DEPRECATED_ACCESS_TO_ENUM_ENTRY_COMPANION_PROPERTY!>entries<!>
+    A.Companion.<!DEBUG_INFO_CALL(""fqName: A.Companion.entries; typeCall: variable"")!>entries<!>
+
+    with(A) {
+        <!DEBUG_INFO_CALL(""fqName: A.Companion.entries; typeCall: variable"")!>entries<!>
+        this.entries
+        <!UNRESOLVED_REFERENCE!>values<!>() // to be sure that we don't resolve into synthetic 'values'
+    }","// !LANGUAGE: +EnumEntries -PrioritizedEnumEntries
+// WITH_STDLIB
+// FIR_DUMP",fe98
+"fun toCallInfo(annotation: FirAnnotationCall, reference: FirSimpleNamedReference)",: CallInfo = C,"// Enabling expectedTypeMismatchIsReportedInChecker clarifies error messages:
+                                    // It will be reported single ARGUMENT_TYPE_MISMATCH on the array literal in checkApplicabilityForArgumentType
+                                    // instead of several TYPE_MISMATCH for every mismatched argument.",7199
+fun bar(),= J,// FILE: first/JavaSuperclass.java,66c3
+fun foo(),{},// !LANGUAGE: +InlineClasses,519f
+fun toLong(),: Long? = T,// !DIAGNOSTICS: -USELESS_ELVIS -UNUSED_EXPRESSION,f543
+fun box(),= i,// EXPECTED_REACHABLE_NODES: 1366,4f27
+fun foo(),{},// !RENDER_DIAGNOSTICS_MESSAGES,519f
+fun create(parcel: Parcel),= -,// WITH_STDLIB,10ab
+fun testIncompatibleScriptJvmTargetConfig(),"{
+        val configuration = makeConfiguration().apply {
+            put(JVMConfigurationKeys.JVM_TARGET, JvmTarget.JVM_1_6)
+        }","// The following environment can be disposed right away since it's only needed to compile the bytecode. The test will use a separate
+        // environment managed by `GenericReplCompiler`.",3a21
+fun box(),= A,// EXPECTED_REACHABLE_NODES: 1285,4f27
+fun box(),": String {
+    val ax: Any? = 0L
+    val an: Any? = null
+    val bx: Long = 0L
+    val by: Long = 1L
+
+    return when {
+        0L != nx -> ""Fail 0""
+        1L == nx -> ""Fail 1""
+        !(0L == nx) -> ""Fail 2""
+        !(1L != nx) -> ""Fail 3""
+        x != nx -> ""Fail 4""
+        y == nx -> ""Fail 5""
+        !(x == nx) -> ""Fail 6""
+        !(y != nx) -> ""Fail 7""
+        0L == nn -> ""Fail 8""
+        !(0L != nn) -> ""Fail 9""
+        x == nn -> ""Fail 10""
+        !(x != nn) -> ""Fail 11""
+        0L != ax -> ""Fail 12""
+        1L == ax -> ""Fail 13""
+        !(0L == ax) -> ""Fail 14""
+        !(1L != ax) -> ""Fail 15""
+        x != ax -> ""Fail 16""
+        y == ax -> ""Fail 17""
+        !(x == ax) -> ""Fail 18""
+        !(y != ax) -> ""Fail 19""
+        bx != ax -> ""Fail 20""
+        by == ax -> ""Fail 21""
+        !(bx == ax) -> ""Fail 22""
+        !(by != ax) -> ""Fail 23""
+        0L == an -> ""Fail 24""
+        !(0L != an) -> ""Fail 25""
+        x == an -> ""Fail 26""
+        !(x != an) -> ""Fail 27""
+        bx == an -> ""Fail 28""
+        !(bx != an) -> ""Fail 29""
+        else -> ""OK""
+    }",// Auto-generated by GeneratePrimitiveVsObjectEqualityTestData. Do not edit!,4f27
+"fun test1(local: Int, nonLocal: String, doNonLocal: Boolean)",": String {
+
+    val localResult = doCall(
+            fun (): Int {
+                if (doNonLocal) {
+                    return@test1 nonLocal
+                }",// FILE: 2.kt,5e68
+fun main(),"{
+    assertFailsWith<AssertionError> {
+        @OptIn(kotlin.experimental.ExperimentalNativeApi::class)
+        assert(false)
+    }","// KIND: STANDALONE_NO_TR
+// IGNORE_NATIVE: optimizationMode=OPT",d987
+"fun <T> foo(t1: T, t2: T)",= t,// !DIAGNOSTICS: -NOTHING_TO_INLINE,ede6
+fun bar(x: Int),: Int = x,// !DIAGNOSTICS: -DEBUG_INFO_SMARTCAST,948a
+fun getO(),": R
+
+    abstract fun getK() : R
+
+    abstract fun getParam() : R
+}
+
+inline fun <R> doWork(crossinline jobO: ()-> R, crossinline jobK: ()-> R, param: R) : A<R> {
+    val s = object : A<R>() {
+
+        override : R {
+            return jobO()
+        }","// NO_CHECK_LAMBDA_INLINING
+// FILE: 1.kt",273a
+fun bar(s: Any),": Int {
+    return s.hashCode()
+}",// FIR_IDENTICAL,1ca8
+fun box(),": String {
+    assertNotNull(s.ptr)
+    assertNotNull(u.ptr)
+    assertNotNull(array)
+
+    assertEquals(""initial"", getContent(s.ptr)?.toKString())
+    setContent(s.ptr, ""yo"")
+    val ptr = getContent(s.ptr)
+    assertEquals(""yo"", ptr?.toKString())
+
+    assertEquals(0.0, getDouble(u.ptr))
+    setDouble(u.ptr, Double.MIN_VALUE)
+    assertEquals(Double.MIN_VALUE, getDouble(u.ptr))
+
+    for (i in 0 until arrayLength()) {
+        assertEquals(0x0, array[i])
+    }","// FREE_CINTEROP_ARGS: -header incompleteTypes.h
+
+// TARGET_BACKEND: NATIVE
+// MODULE: cinterop
+// FILE: incompleteTypes.def",4f27
+fun isCast(),"{
+    if (J.staticFinalJava is String) {
+        <!SMARTCAST_IMPOSSIBLE!>J.staticFinalJava<!>.length
+        (J.staticFinalJava as String).length
+    }","// FIR_IDENTICAL
+// SKIP_TXT
+
+// MODULE: lib
+// FILE: J.java",cc2b
+fun baz(),{},// Should be mapped to java.lang.Throwable,b22f
+fun test(),"{
+            if (::public.isInitialized) throw AssertionError(""Fail 1"")
+            public = ""OK""
+            if (public != ""OK"") throw AssertionError(""Fail 2"")
+
+            if (::private.isInitialized) throw AssertionError(""Fail 3"")
+            private = ""OK""
+            if (private != ""OK"") throw AssertionError(""Fail 4"")
+        }","// LANGUAGE: -NativeJsProhibitLateinitIsInitializedIntrinsicWithoutPrivateAccess
+// WITH_STDLIB",fe98
+fun box(),": String {
+    A.x[0] += 1
+    if (A.x[0] != 1) return ""Fail 1: ${A.x[0]}",// WITH_STDLIB,4f27
+fun foo(),": T;
+    fun bar(o: T);
+}
+
+abstract class B : Java1<Int>   //Kotlin ← Java ← Kotlin
+
+class C(override var a: Int?) : Java1<Int> {    //Kotlin ← Java ← Kotlin with explicit override
+    override fun bar(o: Int?) { }","// SKIP_KT_DUMP
+// TARGET_BACKEND: JVM
+// FULL_JDK
+
+// FILE: Java1.java",519f
+fun k(),= B,"// LANGUAGE: +MultiPlatformProjects
+
+// MODULE: common
+// TARGET_PLATFORM: Common
+// FILE: common.kt",20fe
+fun foo(),{},"// FIR_IDENTICAL
+// !CHECK_TYPE",519f
+fun fromKind(kind: String),": JsModuleKind =
+            J","// DO NOT EDIT MANUALLY!
+// Generated by org/jetbrains/kotlin/generators/arguments/GenerateGradleOptions.kt
+// To regenerate run 'generateGradleOptions' task",fef1
+fun box(),": String {
+    val property = TestChild::class.memberProperties.first { it.name == ""id"" }","// TARGET_BACKEND: JVM
+
+// WITH_REFLECT
+// KT-8131 Cannot find backing field in ancestor class via reflection",4f27
+fun ff(a: Any),= a,// FIR_IDENTICAL,e9f0
+fun box(),": String {
+    return A<Inner<String>>().inner.result
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// IGNORE_BACKEND: JVM
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",4f27
+fun foo(a: Any),"{
+    if (a is A) {
+        if (a == (a == 1)) {
+            println(1)
+        }",// ISSUE: KT-35134,e406
+fun platformTest(),"}
+
+// FILE: main.kt
+import common.*
+import kotlin.test.Test
+
+actual class PlatformTest {
+    @Test actual  {}","// EXPECTED_REACHABLE_NODES: 1697
+// !LANGUAGE: +MultiPlatformProjects
+// TARGET_FRONTEND: ClassicFrontend
+// FIR status: expect/actual in one module
+// KJS_WITH_FULL_RUNTIME
+// SKIP_DCE_DRIVEN
+// RUN_UNIT_TESTS
+// ES_MODULES
+
+// FILE: lib.kt",5226
+fun test(p: T),{},"// FIR_IDENTICAL
+// !JVM_TARGET: 1.8",bfc4
+fun getX(),": Int
+}
+
+abstract class C : T {
+    val x: Int
+        <!ACCIDENTAL_OVERRIDE!>get() = 1<!>
+}",// FIR_IDENTICAL,5bf4
+fun A_X(),{},// !LANGUAGE: -ProhibitVisibilityOfNestedClassifiersFromSupertypesOfCompanion,0645
+fun test(),": Int {
+    val d: Any?
+    d = true
+    return d.compareTo(false)
+}",// JVM_TARGET: 1.8,fe98
+fun describeContents(),= 1,"// CURIOUS_ABOUT describeContents
+// WITH_STDLIB",5ed2
+fun toString(),": String =
+            j","// TARGET_BACKEND: JVM
+// WITH_STDLIB
+
+// FILE: kt46578_anonObject.kt",a535
+fun foo(root: String),"{
+    try {
+        root.let { _ ->
+            try {
+                if (!random()) {
+                    message += root
+                    return
+                }",// FILE: 2.kt,8b32
+fun run(),"fun test(noinline c: () -> Unit) {
+    c()
+    val o = object: Runnable {
+        override  {
+            c()
+        }","// !DIAGNOSTICS: -UNUSED_VARIABLE -NOTHING_TO_INLINE
+// SKIP_TXT
+// WITH_COROUTINES",354f
+fun box(),": String {
+    val s = StringBuilder()
+
+    val xs = StringBuilder(""abcd"")
+
+    for ((index, x) in xs.withIndex()) {
+        s.append(""$index:$x;"")
+        xs.setLength(0)
+    }",// WITH_STDLIB,4f27
+fun makeGlobalStruct(),"{
+        val top = elements.scopes.first()
+        outputStreamWriter = headerFile.printWriter()
+
+        val exportedSymbol = ""${prefix}","// Add nullable primitives, which are used in prototypes of ""(*createNullable<PRIMITIVE_TYPE_NAME>)""",49c2
+fun iterator(),: UIntIterator = U,// !LANGUAGE: +InlineClasses,c20a
+fun test(),"{
+    J.c(Comparator { a, b -> b - a }","// FIR_IDENTICAL
+// FILE: p/J.java",fe98
+fun fo<caret>o(),"{
+    class OriginalClass {
+        val prop = 0
+
+        @Anno(""function $prop"")
+        fun <@Anno(""type param $prop"") F : @Anno(""bound $prop"") List<@Anno(""nested bound $prop"") List<@Anno(""nested nested bound $prop"") String>>> @receiver:Anno(""receiver annotation: $prop"") @Anno(""receiver type $prop"") Collection<@Anno(""nested receiver type $prop"") List<@Anno(""nested nested receiver type $prop"")String>>.explicitType(@Anno(""parameter annotation $prop"") param: @Anno(""parameter type $prop"") ListIterator<@Anno(""nested parameter type $prop"") List<@Anno(""nested nested parameter type $prop"")String>>): @Anno(""explicitType return type $prop"") List<@Anno(""explicitType nested return type $prop"") List<@Anno(""explicitType nested nested return type $prop"") Int>> = 0
+    }",// BODY_RESOLVE,92b3
+fun box(),": String {
+    try {
+        remove()
+    }",// This test checks that bytecode optimizer doesn't crash on unreachable code.,4f27
+fun b(),: T = T,"// SKIP_TXT
+// !DIAGNOSTICS: -UNUSED_PARAMETER",4df1
+fun doSomething(),: Boolean = t,// FIR_IDENTICAL,877b
+fun test1(b: Boolean),": String {
+    val localResult = doCall local@ {
+        if (b) {
+            return@local ""local""
+        }",// FILE: 2.kt,c566
+fun foo(),": Any?
+}
+interface Two {
+    public : String?
+}",// !DIAGNOSTICS: -CONFLICTING_JVM_DECLARATIONS,519f
+fun toString(),": String = ""","// FIR_IDENTICAL
+// ISSUE: KT-62866
+// WITH_STDLIB
+// FIR_DUMP",a535
+fun box(),": String {
+    val targets = A::class.java.getAnnotation(java.lang.annotation.Target::class.java).value
+    if (targets.toList().toString() != ""[TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE, ANNOTATION_TYPE]"")
+        return ""Fail: Java annotation target list should not contain TYPE_USE/TYPE_PARAMETER: ${targets.toList()}","// This test checks that we don't generate target TYPE_USE if `-Xno-new-java-annotation-targets` is used.
+// It's important that this test depends on _full JDK_, which has ElementType.TYPE_USE, to check that filtering based on
+// the compiler argument is taking place.
+
+// TARGET_BACKEND: JVM
+// IGNORE_BACKEND: JVM
+// NO_NEW_JAVA_ANNOTATION_TARGETS
+// FULL_JDK
+// WITH_STDLIB",4f27
+fun test(ls: Out<B>),"{
+    ls.reduce(::Or)
+}",// !DIAGNOSTICS: -UNUSED_PARAMETER,17d2
+fun foo(),= <,// StackOverflow,519f
+fun test_0(b: Boolean),: String = w,"// FIR_IDENTICAL
+// !LANGUAGE: +ProhibitSimplificationOfNonTrivialConstBooleanExpressions
+// ISSUE: KT-39883
+
+// Should always work",17e4
+fun foo(a: A),"{
+    a.s4ClassRepresentation.length
+}","// FIR_IDENTICAL
+// SKIP_TXT
+// FILE: A.java",05b4
+fun f(),= 3,"// EXPECTED_REACHABLE_NODES: 1288
+// FILE: A.kt",f6fb
+fun f(),= 6,// FILE: B.kt,f6fb
+fun test(),"{
+    val processor = AdapterProcessor<PsiMethod, PsiClass>(
+        Function { method: PsiMethod? -> method?.containingClass }","// !DIAGNOSTICS: -UNUSED_VARIABLE
+
+// FILE: Function.java",fe98
+fun box(),": String {
+    val d = Derived()
+    return d::a.get()
+}","// TARGET_BACKEND: JVM_IR
+// IGNORE_BACKEND_K1: JVM_IR
+// Field VS property: case ""reference""
+
+// FILE: BaseJava.java",4f27
+fun bar(),: Array<A> = n,// FIR_IDENTICAL,66c3
+fun main(a: A),"{
+    a.foo(<!JAVA_TYPE_MISMATCH!>a.bar()<!>)
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE
+// FILE: A.java",c1f5
+fun <T> consumeLongAndMaterialize(x: Long),: T = n,"// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_PARAMETER -UNCHECKED_CAST -UNUSED_EXPRESSION",28ab
+fun foo(t: String),{},"// SKIP_KT_DUMP
+// FIR_IDENTICAL
+// TARGET_BACKEND: JVM
+
+// FILE: Java1.java",2230
+fun foo(),{},// WITH_REFLECT,519f
+fun test(),": Int {
+        return x
+    }",// FILE: Base.kt,fe98
+fun test(),"{
+    val t = X.E.t
+    <!DEBUG_INFO_EXPRESSION_TYPE(""(X<(I<(kotlin.Any..kotlin.Any?)>..I<(kotlin.Any..kotlin.Any?)>?), (kotlin.Any..kotlin.Any?), (I<(kotlin.Any..kotlin.Any?)>..I<(kotlin.Any..kotlin.Any?)>?)>..X<out (I<*>..I<*>?), *, out (I<*>..I<*>?)>?)"")!>t<!>
+    t.id // should be OK
+}","// WITH_STDLIB
+// FULL_JDK
+
+// FILE: X.java",fe98
+fun box(),= e,// FUNCTION: infix.dispatch.Wrapper.mustEqual,4f27
+fun test(x: A),"{
+    if (x !is C) return
+    if (x is B) {
+        x.<!OVERLOAD_RESOLUTION_AMBIGUITY!>foo<!>.<!DEBUG_INFO_MISSING_UNRESOLVED!>foo<!>
+        x.getFoo().foo
+    }","// ISSUE: KT-10879
+// FILE: A.java",1cb3
+"fun main(default: PolicyFromDefault, nickname: PolicyFromNickname)","{
+    default.foo(<!NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS!>null<!>).length
+    default.foo(""hello"").length
+
+    nickname.foo(<!NULL_FOR_NONNULL_TYPE!>null<!>).length
+    nickname.foo(""hello"").length
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNUSED_VARIABLE -UNUSED_PARAMETER
+// JSR305_GLOBAL_REPORT: warn
+
+// FILE: NonNullApi.java",f197
+"fun commonFunctionWithActualization(commonActualization: MyCommonClassWithActualization, common: MyCommonClass)","expect var commonVariableWithActualization: MyCommonClassWithActualization
+
+fun commonFunction1(commonActualization: MyCommonClassWithActualization, common: MyCommonClass) {
+
+}","// mypack.MyFacadeKt
+// SKIP_IDE_TEST
+// MODULE: main-common
+// FILE: commonFile1.kt",37f5
+fun run(),"fun interface KRunnable {
+    
+}","// TARGET_BACKEND: JVM
+// JVM_TARGET: 1.8
+// SAM_CONVERSIONS: INDY
+
+// CHECK_BYTECODE_TEXT
+// JVM_IR_TEMPLATES
+// 1 java/lang/invoke/LambdaMetafactory",354f
+fun main(),"{
+    <!NEW_INFERENCE_NO_INFORMATION_FOR_PARAMETER!>test<!> {
+
+    }","// !DIAGNOSTICS: -UNREACHABLE_CODE
+//KT-2445 Calling method with function with generic parameter causes compile-time exception",d987
+fun f(q: Any),= q,// FIR_IDENTICAL,9cac
+fun <T> parseAs(dataClass : MyClass<T>),": T {
+        throw Exception()
+    }","// FIR_IDENTICAL
+// !CHECK_TYPE
+
+//KT-2505 Type mismatch: inferred type is T but T was expected",3530
+"fun test(a: Char, b: Char)",": String {
+    var s = """"
+    for (i in a..<b) {
+        s += i
+    }","// !OPT_IN: kotlin.ExperimentalStdlibApi
+// IGNORE_BACKEND: JVM
+
+// IMPORTANT!
+// Please, when your changes cause failures in bytecodeText tests for 'for' loops,
+// examine the resulting bytecode shape carefully.
+// Range and progression-based loops generated with Kotlin compiler should be
+// as close as possible to Java counter loops ('for (int i = a; i < b; ++i) { ... }').
+// Otherwise it may result in performance regression due to missing HotSpot optimizations.
+// Run Kotlin compiler benchmarks (https://github.com/Kotlin/kotlin-benchmarks)
+// with compiler built from your changes if you are not sure.",1436
+fun f(),{},// TARGET_BACKEND: JVM_IR,f6fb
+fun box(),": String {
+    val list1 = ArrayList<Int>()
+    val range1 = 1..<5
+    for (i in range1) {
+        list1.add(i)
+        if (list1.size > 23) break
+    }","// DONT_TARGET_EXACT_BACKEND: JVM
+// Auto-generated by org.jetbrains.kotlin.generators.tests.GenerateRangesCodegenTestData. DO NOT EDIT!
+// !LANGUAGE: +RangeUntilOperator
+// WITH_STDLIB",4f27
+fun printMessages(),"{
+    Message.HELLO.text!!
+    <!DEBUG_INFO_SMARTCAST!>Message.HELLO.text<!>.length
+
+    <!DEBUG_INFO_SMARTCAST!>Message.NOTHING.text<!>.length
+
+    Message.NOTHING.text<!UNNECESSARY_NOT_NULL_ASSERTION!>!!<!>
+    <!DEBUG_INFO_SMARTCAST!>Message.NOTHING.text<!>.length
+}","// !LANGUAGE: -SoundSmartcastForEnumEntries
+// !DIAGNOSTICS: -UNUSED_VARIABLE
+// SKIP_TXT",6a16
+fun call(),"{
+    val a = <expr>A()</expr>
+}",// FILE: call.kt,f930
+fun publicMemberK(),{},"// TARGET_BACKEND: JVM
+
+// WITH_REFLECT
+// FILE: J.java",010f
+fun foo(),= 2,// FIR_IDENTICAL,519f
+fun test(foo: Foo),"{
+    <caret_context>foo.call()
+}","// !LANGUAGE: +MultiPlatformProjects
+
+// MODULE: common
+// TARGET_PLATFORM: Common
+
+// FILE: Common.kt",741b
+fun box(),": String {
+    with(0) {
+        Child()
+    }","// !LANGUAGE: +ContextReceivers
+// TARGET_BACKEND: JVM_IR",4f27
+fun foo(),": Triple<S, Q, U> = T",// WITH_STDLIB,519f
+fun foo(x: Any),{},"// SKIP_TXT
+// FIR_IDENTICAL",d233
+fun foo(a: Any),": Int {
+    if (a is IntArray) {
+        a.get(0)
+        a.set(0, 1)
+        a.iterator()
+        return a.size
+    }",//KT-2997 Automatically cast error (Array),e406
+fun foo(),{},"// FIR_IDENTICAL
+// MODULE: m1
+// FILE: x.kt",519f
+"fun _is_l(e: Either<C1, C2>)",": Any {
+    if (e !is Left) {
+        return e
+    }","// FIR_IDENTICAL
+// !DIAGNOSTICS: -DEBUG_INFO_SMARTCAST",b476
+fun box(),": String {
+    val ls = listOf(""OK"").map(::Wrapper)
+    return ls[0].value
+}",// WITH_STDLIB,4f27
+fun box(),": String {
+    assertEquals(""kotlin.String!"", J::string.returnType.toString())
+    assertEquals(""kotlin.collections.(Mutable)List<kotlin.Any!>!"", J::list.returnType.toString())
+
+    return ""OK""
+}","// TARGET_BACKEND: JVM
+
+// WITH_REFLECT
+// FILE: J.java",4f27
+fun example(),"{
+    val a = if (true) true else false
+    val b = <!INVALID_IF_AS_EXPRESSION!>if<!> (true) else false
+    val c = <!INVALID_IF_AS_EXPRESSION!>if<!> (true) true
+    val d = <!INVALID_IF_AS_EXPRESSION!>if<!> (true) true else;
+    val e = if (true) <!IMPLICIT_CAST_TO_ANY!>{}",// !DIAGNOSTICS: -UNUSED_VARIABLE,29b8
+fun foo(c: List<Int>),"{
+    var i = 2
+
+    return
+
+    for (j in c) {  //strange selection of unreachable code
+        i += 23
+    }",//KT-1027 Strange selection of unreachable code,daeb
+fun box(),"{
+    val a: Int? = 3
+    when (a) {
+        1 -> {
+            1
+        }",// FILE: test.kt,4f27
+fun setModules(vararg project: Any),"fun addModule(project: Any)
+    fun createArtifact(extensions: ExtensionAware): KotlinArtifact
+}
+
+/**
+ * @suppress
+ */
+interface KotlinNativeArtifactConfig : KotlinArtifactConfig {
+    var modes: Set<NativeBuildType>
+    fun modes(vararg modes: NativeBuildType)
+    var isStatic: Boolean
+    var linkerOptions: List<String>
+    @Deprecated(
+        ""Please migrate to toolOptions DSL. More details are here: https://kotl.in/u1r8ln""
+    )
+    fun kotlinOptions(@Suppress(""DEPRECATION"") fn: Action<KotlinCommonToolOptions>)
+    fun toolOptions(configure: Action<KotlinCommonCompilerToolOptions>)
+    fun binaryOption(name: String, value: String)
+}","/**
+ * @suppress
+ */",2ce9
+fun targets(vararg targets: KonanTarget),"var embedBitcode: BitcodeEmbeddingMode?
+}
+
+/**
+ * @suppress
+ */
+interface KotlinNativeXCFrameworkConfig : KotlinNativeArtifactConfig {
+    var targets: Set<KonanTarget>
+    
+    var embedBitcode: BitcodeEmbeddingMode?
+}","/**
+ * @suppress
+ */",0d5e
+fun foo(),= x,"// JVM_ABI_K1_K2_DIFF: KT-62714, KT-63880",519f
+fun <T> takeVarargs(vararg e: T),": T {
+    return e[e.size - 1]
+}","// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses",ad1b
+fun decodeCDPEvent(element: JsonElement),": CDPEvent {
+    val method = element.jsonObject[""method""]!!.jsonPrimitive.content
+    val params = element.jsonObject[""params""] ?: error(""missing params"")
+    return when (method) {
+        ""Debugger.breakpointResolved"" -> json.decodeFromJsonElement(Debugger.Event.BreakpointResolved.serializer(), params)
+        ""Debugger.paused"" -> json.decodeFromJsonElement(Debugger.Event.Paused.serializer(), params)
+        ""Debugger.resumed"" -> json.decodeFromJsonElement(Debugger.Event.Resumed.serializer(), params)
+        ""Debugger.scriptFailedToParse"" -> json.decodeFromJsonElement(Debugger.Event.ScriptFailedToParse.serializer(), params)
+        ""Debugger.scriptParsed"" -> json.decodeFromJsonElement(Debugger.Event.ScriptParsed.serializer(), params)
+        ""Runtime.executionContextCreated"" -> json.decodeFromJsonElement(Runtime.Event.ExecutionContextCreated.serializer(), params)
+        ""Runtime.executionContextDestroyed"" -> json.decodeFromJsonElement(Runtime.Event.ExecutionContextDestroyed.serializer(), params)
+        else -> UnknownCDPEvent(method)
+    }","/**
+ * A superclass for each kind of CDP method invocation result.
+ */",d288
+fun foo(),"{
+    val a3: Int = <!INTEGER_OVERFLOW!><!INTEGER_OVERFLOW!>intMaxValue + 1<!> - 10<!>
+    val a4: Int = <!INTEGER_OVERFLOW!>intMaxValue + 1<!> + 10
+    val i2: Int = <!INTEGER_OVERFLOW!>intMaxValue - 1 + 2<!>
+    val i3: Int = <!INTEGER_OVERFLOW!>intMaxValue - intMinValue<!>
+    val i4: Int = <!INTEGER_OVERFLOW!>-intMinValue<!>
+    val i5: Int = <!INTEGER_OVERFLOW!>intMinValue - 1<!>
+    val i6: Int = <!INTEGER_OVERFLOW!>intMinValue - intMaxValue<!>
+    val i7: Int = intMinValue + intMaxValue
+    val i8: Int = -intMaxValue
+    val i10: Int = <!INTEGER_OVERFLOW!>intMinValue * -1<!>
+    val i11: Int = <!INTEGER_OVERFLOW!>intMinValue * 2<!>
+    val i12: Int = <!INTEGER_OVERFLOW!>intMaxValue * -2<!>
+    val i13: Int = intMaxValue * -1
+    val i15: Int = <!INTEGER_OVERFLOW!>intMinValue / -1<!>
+    val l20: Int = <!INTEGER_OVERFLOW!>30 * 24 * 60 * 60 * 1000<!>
+    val l21: Int = intMinValue - intMinValue
+    val l22: Int = <!INTEGER_OVERFLOW!>intMinValue + <!INTEGER_OVERFLOW!>-intMinValue<!><!>
+    val l23: Int = intMaxValue + <!INTEGER_OVERFLOW!>-intMinValue<!>
+    val l25: Int = (-1).rem(5)
+    val l26: Int = (-1) % 5
+}",// !DIAGNOSTICS: -UNUSED_VARIABLE,519f
+fun checkTrue(),": Boolean
+    fun checkFalse(): Boolean
+    fun checkTrueWithMessage(): Boolean
+    fun checkFalseWithMessage(): Boolean
+}
+
+class ShouldBeDisabled : Checker {
+    override : Boolean {
+        var hit = false
+        val l = { hit = true; true }",// FILE: inlineSite.kt,6a1b
+fun example(),": Single<out ClientBootResult> {
+    return Single.just(true).map<ClientBootResult> { ClientBootSuccess }","// FIR_IDENTICAL
+// SKIP_TXT
+// FILE: main.kt",29b8
+fun box(),": String {
+    val sub = Sub::class
+
+    assertEquals(listOf(""a"", ""c""), sub.memberProperties.map { it.name }","// TARGET_BACKEND: JVM
+
+// WITH_REFLECT",4f27
+fun box(),": String {
+    var sum = 0
+    for (x in xs) {
+        sum = sum * 10 + x
+        xs = IntArray(0)
+    }",// WITH_STDLIB,4f27
+fun foo(),: Unit<!> = d,// FIR_IDENTICAL,519f
+fun doo(),<expr>{},// LOOK_UP_FOR_ELEMENT_OF_TYPE: org.jetbrains.kotlin.psi.KtBlockExpression,5012
+fun test(),= r,"// TARGET_BACKEND: JVM
+
+// FILE: JavaClass.java",fe98
+"fun <T> bar(a: T, i: Int)",": T {
+    global += ""$i""
+    return a
+}",// EXPECTED_REACHABLE_NODES: 1282,fdca
+fun <T> asList(t: T),: List<T>? {<!NO_RETURN_IN_FUNCTION_WITH_BLOCK_BODY!>},//KT-1127 Wrong type computed for Arrays.asList(),e0c4
+fun test(),"{
+    val b = MyMapEntry()
+    val key = b.key
+    val value = b.value
+    b.setValue(null)
+}",// FILE: Test.java,fe98
+fun foo(a: T),"}
+
+// MODULE: m2(m1)
+// FILE: b.kt
+package p
+
+public interface C<X> : B<X> {
+    override fun foo(a: X)
+
+}","// FIR_IDENTICAL
+// !DIAGNOSTICS: -UNNECESSARY_SAFE_CALL -SAFE_CALL_WILL_CHANGE_NULLABILITY
+
+// MODULE: m1
+// FILE: a.kt",9f54
+fun foo(a: T),"}
+
+// MODULE: m4(m3, m2)
+// FILE: c.kt
+import p.*
+
+fun test(b: B<String>?) {
+    if (b is C) {
+        b?.foo("""")
+    }","// MODULE: m3
+// FILE: b.kt",9f54
+fun a(),": String
+}
+
+inline fun test(crossinline z: () -> String) =
+    o","// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// FILE: 1.kt",9ea5
+fun x(),"= """,// FILE: test.kt,7869
+fun main(c: CollectionWithSize),"{
+    CompressionType.ZIP.<!OVERLOAD_RESOLUTION_AMBIGUITY!>name<!> <!UNRESOLVED_REFERENCE_WRONG_RECEIVER!>checkType<!> { <!INAPPLICABLE_CANDIDATE!>_<!><<!CANNOT_INFER_PARAMETER_TYPE!>Double<!>>() }","// !LANGUAGE: -PreferJavaFieldOverload
+
+// SKIP_TXT
+// !CHECK_TYPE
+
+// FILE: CompressionType.java",a07a
+fun foo(),{},"// WITH_STDLIB
+// FILE: part1.kt",519f
+fun bar(),{},// FILE: part2.kt,66c3
+fun box(),": String {
+
+    var i = 0
+
+    i = 0
+    global = """"
+    do {
+        if (i<3) {i++; continue}",// EXPECTED_REACHABLE_NODES: 1283,4f27
+fun foo(),"{
+    val x: String?
+    x = materialize()!! // Should be treated as non-nullable assignment
+    x.length // Should be allowed
+}","// FIR_DUMP
+// ISSUE: KT-55804",519f
+fun box(),": String {
+    val actualIndices = mutableListOf<Int>()
+    val actualValues = mutableListOf<Int>()
+    for ((index, i) in J.listOfNotNull().withIndex()) {
+        actualIndices += index
+        actualValues += i
+    }","// !LANGUAGE: +StrictJavaNullabilityAssertions
+// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// JVM_TARGET: 1.8
+
+// FILE: box.kt",4f27
+fun box(),": String {
+    return OK().foo
+}","// TARGET_BACKEND: JVM
+// WITH_STDLIB
+// FILE: 1.kt",4f27
+fun test(),= c,"// FIR_IDENTICAL
+// SKIP_TXT
+// ISSUE: KT-52691",fe98
+fun <T> materialize(),: T = n,// !DIAGNOSTICS: -UNUSED_PARAMETER -UNUSED_EXPRESSION -CAST_NEVER_SUCCEEDS -UNUSED_VARIABLE -UNCHECKED_CAST,6522
+fun bar(),"fun <T : Collection<S>, S : List<<!WRONG_MODIFIER_TARGET!>out<!> *>> foo(x: T)
+     {
+        val s = ArrayList<ArrayList<Int>>()
+        foo(s)
+    }","// FIR_IDENTICAL
+// Reproduces exception in TypeResolver.kt: EA-66870",66c3
+fun method(),{},"// TARGET_BACKEND: JVM
+// FULL_JDK
+// WITH_REFLECT",f9b6
+fun box(),": String {
+    val c = A(1, ""1"")
+    c.b = 2
+    c.a = ""2""
+    return if (c.b == 2 && c.a == ""2"") ""OK"" else ""fail""
+}",// EXPECTED_REACHABLE_NODES: 1282,4f27
+fun <R> foo(),: Inner<R>? = n,"// SKIP_JDK6
+// TARGET_BACKEND: JVM
+// WITH_REFLECT",85df
+fun <reified M> parse(),: M? = T,// !DIAGNOSTICS: -UNUSED_PARAMETER -UNUSED_VARIABLE,2df5
+fun run(),"fun interface SAM {
+    
+}",// SAM_CONVERSIONS: CLASS,354f
+fun hasNext(),: Boolean = i,"// WITH_STDLIB
+// WORKS_WHEN_VALUE_CLASS
+// LANGUAGE: +ValueClasses, +GenericInlineClassParameter",2c39
