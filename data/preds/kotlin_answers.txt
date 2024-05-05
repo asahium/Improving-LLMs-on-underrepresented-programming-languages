@@ -1,0 +1,100 @@
+{\n    val arg: UserKlass = UserKlass()\n    val buildee = build {\n        yield(id(arg))\n    }
+{\n    fun consume(arg: UserKlass) {}
+{\n    val buildee = build {\n        setTypeVariable(TargetType())\n        extensionSetOutProjectedTypeVariable(DifferentType())\n    }
+{ storage = value }
+: B = t
+: String = s
+= x
+{\n    Foo { it }
+: String {\n    val c = C("a", 42u)\n    if (c.y0 != 42u) throw AssertionError()\n\n    return "OK"\n}
+: Option<T> {\n    return if (r is Some) {\n        // Ideally we should infer Option<T> here (see KT-10896)\n        (if (true) None() else r) checkType { _<Option<T>>() }
+: Option<T> {\n    return if (r is Some) {\n        // Works correctly\n        if (true) None<T>() else r\n    }
+{\n    contract {\n        returns(true) implies b\n        returns(false) implies (!b)\n    }
+{\n    run {<!RETURN_NOT_ALLOWED!>return<!>}
+{\n            hazard = true\n        }
+fun test(noinline c: () -> Unit) {\n    c()\n    val o = object : Runnable {\n        override  {\n            c()\n        }
+{\n    class A\n    \n    class B {\n        val x = ::A\n        val f: KFunction0<A> = x\n    }
+: String? {\n    sideEffectsHolder.add(param)\n    return "Result $param"\n}
+= 1
+: String\n}\n\ninterface J {\n    fun bar(): String\n}
+: E1\n    val bar: E1\n}\n\ninterface MyList<out E2> : MyCollection<E2> {\n    override : E2\n    override val bar: E2\n}
+{\n        list.addAll(c)\n    }
+: Base = o
+: Int {\n    return c.<!FUNCTION_EXPECTED!>start<!>()\n}
+: String {\n    return "OK"\n}
+: String {\n    var xz = Z(0)\n    var xl = L(0L)\n    var xs = Str("")\n    var xo = Obj("")\n\n    val fn = {\n        xz = Z(42)\n        xl = L(1234L)\n        xs = Str("abc")\n        xo = Obj("def")\n    }
+: Int {\n        log += "($id).component1();"\n        return 1\n    }
+{\n    var i = 1\n    while (i < 10) {\n        bar()\n        i = i.inc()\n    }
+= r
+= B
+{\n    val g: (Int) -> Unit = if (true) {\n        val set = HashSet<Int>()\n        fun (i: Int) {\n            set.add(i)\n        }
+= 1
+: String? {\n    return plugin.commonFields?.screenShots\n}
+: String =\n    f
+= 4
+: String {\n    val x = X()\n\n    return when {\n        bar != 23 -> "fail 1"\n        muc != "fifth" -> "fail 2"\n        toc != "sixth" -> "fail 3"\n\n        x.bar != "seventh" -> "fail 4"\n        x.muc != 29 -> "fail 5"\n        x.toc != "eighth" -> "fail 6"\n\n        else -> "OK"\n    }
+: String {\n    val x = recursive<Int, Int, Int, Int, Int, Int, String>(){ "abc" }
+{\n    val text: List<Any> = null!!\n    text.<!UNRESOLVED_REFERENCE!>map<!> <!DEBUG_INFO_MISSING_UNRESOLVED!>Any<!><!SYNTAX!>?<!>::<!DEBUG_INFO_MISSING_UNRESOLVED!>toString<!>\n}
+{\n        val addLen = toIndex - fromIndex\n        val oldLen = length\n        val newLen = oldLen + addLen\n        if (newLen > buf.size) buf = buf.copyOf(newLen.coerceAtLeast(2 * buf.size))\n        for (i in 0 until addLen) buf[oldLen + i] = source[fromIndex + i]\n        length += addLen\n    }
+: T = p
+: String {\n    try {\n        for (i in 0 until 1) {\n            try {\n                val x = "x"\n                throw RuntimeException(x)\n            }
+: T\n}\n\nclass Derived<T> : Base<T> {\n    override : T = "error" as T\n}
+{\n    if (s1.s1 != "OK" && x != X1) throw AssertionError()\n}
+: Int {\n    result += "OK"\n    return 123\n}
+{}
+{\n    <!EQUALITY_NOT_APPLICABLE!>(1 to A()) == A()<!>\n    <!EQUALITY_NOT_APPLICABLE!>(1 to B()) == B()<!>\n\n    <!EQUALITY_NOT_APPLICABLE!>(1 to A()) === A()<!>\n    <!EQUALITY_NOT_APPLICABLE!>(1 to B()) === B()<!>\n}
+{\n    register(some.g)\n}
+{\n        val duplicateClasses =\n            another.mapNotNull { it.descriptor }
+: String {\n    class L : C({}
+: Boolean\n}\ninterface B : A\ninterface C : A\n\nfun test() {\n    var a: A? = null\n    while (a is B || a is C) {\n        a.foo()\n    }
+: T = s
+: String {\n\n    val z = 1;\n\n    val p = z[2, 3]\n    if (p != 6) return "fail 1: $p"\n\n    z[2, 3] = p\n    if (res != 12) return "fail 2: $res"\n\n    return "OK"\n}
+: @Anno("explicit type $constant") List<@Anno("nested explicit type $constant") List<@Anno("nested nested explicit type $constant") T>>? = n
+}\n\n// MODULE: m2-jvm()()(m1-common)\n// FILE: jvm.kt\n\nactual open class Foo {\n    actual  {}
+: JsMainFunctionExecutionMode =\n            J
+: String = "
+= i
+: String {\n    var result = "fail"\n    val c = C()\n    c.x = { result = "OK" }
+= x
+{}
+{\n    _b.a_b()\n}
+: R\n\n    abstract fun getK() : R\n}\n\n\ninline fun <R> doWork(job: ()-> R) : R {\n    return job()\n}
+: String {\n    val o = "O"\n    val p = "GOOD"\n    val result = doWork {\n        val k = "K"\n        val s = object : A<String>() {\n\n            val param = p;\n\n            override fun getO(): String {\n                return o;\n            }
+= M
+: S = x
+: String {\n    var s = "Failt"\n    JavaClass<String>().perform("") { s = "OK" }
+= "
+: String {\n    for (i in 1 .. 2) {\n        for (j in 1u .. break) {}
+= "
+: kotlin.Boolean {\n      return _builder.hasExtras()\n    }
+: kotlin.Boolean {\n      return _builder.hasType()\n    }
+{\n      _builder.clearCoordinates()\n    }
+: kotlin.Boolean {\n      return _builder.hasCoordinates()\n    }
+: String = b
+: String = O
+: Int {\n    return <!EXPECT_TYPE_IN_WHEN_WITHOUT_ELSE, NO_ELSE_IN_WHEN!>when<!> (s) { // should be error, because actual sealed class may add more implementations\n        is SealedClass.Nested.NestedDeeper -> 7\n        is SealedClass.Nested -> 8\n    }
+: Boolean {\n            val owner = expression.symbol.owner\n            return owner.hasFunInterfaceParent() && owner.modality != Modality.ABSTRACT\n        }
+{\n    val b: Int\n    run { b = 1 }
+{\n    class MatchedItem(val item: ItemType)\n    class MatchedItem1<T>(val item: ItemType)\n    <!CLASS_LITERAL_LHS_NOT_A_CLASS!>MatchedItem::class<!>\n    MatchedItem::item\n    MatchedItem1::class\n    <!WRONG_NUMBER_OF_TYPE_ARGUMENTS!>MatchedItem1<!>::item\n    <!CLASS_LITERAL_LHS_NOT_A_CLASS!>MatchedItem1<Int>::class<!>\n    MatchedItem1<Int>::item\n}
+= a
+: String {\n    val charBound = Char.MIN_VALUE\n    if ('b' in 'a' until charBound) return "Fail in Char.MIN_VALUE"\n    if (!('b' !in 'a' until charBound)) return "Fail !in Char.MIN_VALUE"\n\n    val intBound = Int.MIN_VALUE\n    if (1 in 0 until intBound) return "Fail in Int.MIN_VALUE"\n    if (!(1 !in 0 until intBound)) return "Fail !in Int.MIN_VALUE"\n\n    val longBound = Long.MIN_VALUE\n    if (1L in 0L until longBound) return "Fail in Long.MIN_VALUE"\n    if (!(1L !in 0L until longBound)) return "Fail !in Long.MIN_VALUE"\n\n    val uIntBound = UInt.MIN_VALUE\n    if (1u in 0u until uIntBound) return "Fail in UInt.MIN_VALUE"\n    if (!(1u !in 0u until uIntBound)) return "Fail !in UInt.MIN_VALUE"\n\n    val uLongBound = ULong.MIN_VALUE\n    if (1uL in 0uL until uLongBound) return "Fail in ULong.MIN_VALUE"\n    if (!(1uL !in 0uL until uLongBound)) return "Fail !in ULong.MIN_VALUE"\n\n    return "OK"\n}
+: String = "
+{\n        val parameters = type.constructor.parameters\n        val arguments = type.arguments\n        val substitutor = TypeSubstitutor.create(type)\n\n        val diagnostic =\n            if (reportWarning)\n                UPPER_BOUND_VIOLATED_IN_TYPEALIAS_EXPANSION_WARNING\n            else\n                UPPER_BOUND_VIOLATED_IN_TYPEALIAS_EXPANSION\n\n        for (i in arguments.indices) {\n            if (arguments[i].isStarProjection) continue\n            val argumentType = arguments[i].type\n\n            checkBoundsForAbbreviatedSupertype(argumentType, trace, typeReference, reportWarning)\n\n            checkBounds(\n                argumentReference = null,\n                argumentType, parameters[i], substitutor, trace,\n                typeAliasUsageElement = typeReference, diagnosticForTypeAliases = diagnostic,\n            )\n        }
+fun interface NestedSAM {\n        \n    }
+{}
+{\n    eatAString(w)\n    eatAStringN(<!TYPE_MISMATCH!>w<!>)\n}
+{}
+{\n    a.foo("", null)<!UNNECESSARY_SAFE_CALL!>?.<!>length\n    a.foo("", null).length\n    a.foo(<!NULL_FOR_NONNULL_TYPE!>null<!>, "").length\n\n    a.bar().length\n    a.bar()<!UNNECESSARY_NOT_NULL_ASSERTION!>!!<!>.length\n\n    a.field<!UNNECESSARY_SAFE_CALL!>?.<!>length\n    a.field.length\n\n    a.baz()<!UNSAFE_CALL!>.<!>get(0)\n    a.baz()!!.get(0).get(0)\n    a.baz()!!.get(0)<!UNNECESSARY_SAFE_CALL!>?.<!>get(0)\n}
+: Boolean {\n    val result = x in left..right\n    val manual = x >= left && x <= right\n    val range = left..right\n    assertTrue(result == manual, "Failed: optimized === manual for $range")\n    assertTrue(result == checkUnoptimized(x, range), "Failed: optimized === unoptimized for $range")\n    return result\n}
+: Unit {}
+{\n    Foo<Any>({}
+{\n        res = value.value\n    }
+: String {\n    for (i in D.indices) {\n        for (j in D[i].data.indices) {\n            val x = D[i].data[j].toInt()\n            if (x != i + j) throw AssertionError()\n        }
+: String {\n    var result = ""\n    for (x in 1..3) {\n        result += x\n    }
+: String {\n    val p = object : Test() {}
+= o
+: String {\n    var c = A()\n    c = A()\n    c = A()\n    return if (a == 3) "OK" else "fail: $a"\n}
+{}
+= j
+{\n\n    }
+: Value<T>\n}\n\nclass Singleton<T>(val x: T) : WithValue<T> {\n    override  = Value(x)\n}

@@ -1,16 +1,14 @@
-# Copyright (c) Microsoft Corporation. 
-# Licensed under the MIT license.
 import os
 import logging
 import argparse
 from fuzzywuzzy import fuzz
-import json
 import re
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 def post_process(code):
+    """Post-process the generated code to replace placeholders with literals."""
     code = code.replace("<NUM_LIT>", "0").replace("<STR_LIT>", "").replace("<CHAR_LIT>", "")
     pattern = re.compile(r"<(STR|NUM|CHAR)_LIT:(.*?)>", re.S)
     lits = re.findall(pattern, code)
@@ -19,9 +17,9 @@ def post_process(code):
     return code
 
 def main():
-    parser = argparse.ArgumentParser(description='Evaluate leaderboard predictions for code completion (line level).')
-    parser.add_argument('--answers', '-a', required=True, help="filename of the labels, in json format.")
-    parser.add_argument('--predictions', '-p', required=True, help="filename of the leaderboard predictions, in txt format.")
+    parser = argparse.ArgumentParser(description='Evaluate code prediction quality.')
+    parser.add_argument('--answers', '-a', required=True, help="Filename of the ground truth answers, in txt format.")
+    parser.add_argument('--predictions', '-p', required=True, help="Filename of the generated predictions, in txt format.")
     args = parser.parse_args()
 
     preds = open(args.predictions, "r").readlines()
@@ -32,14 +30,15 @@ def main():
     total = len(gts)
     EM = 0.0
     edit_sim = 0.0
+
     for pred, gt in zip(preds, gts):
         pred = post_process(pred.strip())
-        gt = post_process(json.loads(gt)["gt"])
+        gt = post_process(gt.strip())
         edit_sim += fuzz.ratio(pred, gt)
         if pred.split() == gt.split():
             EM += 1
 
-    logger.info(f"Edit sim: {round(edit_sim/total, 2)}, EM: {round(EM/total*100, 2)}")
+    logger.info(f"Edit sim: {round(edit_sim / total, 2)}, EM: {round(EM / total * 100, 2)}")
 
 if __name__ == "__main__":
     main()
